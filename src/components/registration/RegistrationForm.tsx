@@ -118,32 +118,50 @@ export function RegistrationForm() {
     return () => URL.revokeObjectURL(previewUrl);
   }, [file]);
 
+  function validateField<K extends keyof FormState>(key: K, valuesToValidate: FormState) {
+    const parsed = schema.safeParse(valuesToValidate);
+    if (parsed.success) return null;
+
+    const issue = parsed.error.issues.find((issue) => issue.path[0] === key);
+    return issue?.message ?? null;
+  }
+
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setValues((previousValues) => ({ ...previousValues, [key]: value }));
+    const nextValues = { ...values, [key]: value };
+    setValues(nextValues);
     setApiError(null);
     setErrors((previousErrors) => {
-      if (!previousErrors[key as string]) return previousErrors;
       const nextErrors = { ...previousErrors };
-      delete nextErrors[key as string];
+      const errorMessage = validateField(key, nextValues);
+
+      if (errorMessage) {
+        nextErrors[key as string] = errorMessage;
+      } else {
+        delete nextErrors[key as string];
+      }
+
       return nextErrors;
     });
   }
 
   function toggleInterest(interestName: string) {
-    setValues((previousValues) => {
-      const hasInterest = previousValues.interests.includes(interestName);
-      return {
-        ...previousValues,
-        interests: hasInterest
-          ? previousValues.interests.filter((interest) => interest !== interestName)
-          : [...previousValues.interests, interestName],
-      };
-    });
+    const nextInterests = values.interests.includes(interestName)
+      ? values.interests.filter((interest) => interest !== interestName)
+      : [...values.interests, interestName];
+
+    const nextValues = { ...values, interests: nextInterests };
+    setValues(nextValues);
     setApiError(null);
     setErrors((previousErrors) => {
-      if (!previousErrors.interests) return previousErrors;
       const nextErrors = { ...previousErrors };
-      delete nextErrors.interests;
+      const errorMessage = validateField("interests", nextValues);
+
+      if (errorMessage) {
+        nextErrors.interests = errorMessage;
+      } else {
+        delete nextErrors.interests;
+      }
+
       return nextErrors;
     });
   }
