@@ -32,15 +32,6 @@ function ThankYou() {
         </div>
 
         <h1 className="text-3xl font-black tracking-tight">Registration saved!</h1>
-        <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
-          The form data has been stored in the local SQLite database, and the photo path is saved
-          with the registration record.
-        </p>
-
-        <div className="mt-6 grid grid-cols-2 gap-3 text-left">
-          <StatusCard icon={<Database className="h-4 w-4" />} title="Data saved" />
-          <StatusCard icon={<ImagePlus className="h-4 w-4" />} title="Photo stored" />
-        </div>
 
         <Button asChild className="mt-7 h-11 rounded-xl px-6 font-semibold">
           <Link to="/">Submit another</Link>
