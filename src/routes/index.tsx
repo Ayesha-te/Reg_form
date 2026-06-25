@@ -17,16 +17,10 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <main className="min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-3xl rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[var(--shadow-soft)] ring-1 ring-primary/5 backdrop-blur-xl sm:p-10">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Registration</h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          Please complete the form below to submit your registration.
-        </p>
-
-        <div className="mt-8">
-          <RegistrationForm />
-        </div>
+    <main className="relative min-h-screen overflow-hidden bg-[var(--gradient-surface)] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[linear-gradient(135deg,oklch(0.58_0.21_264_/_18%),oklch(0.76_0.16_198_/_16%),transparent)]" />
+      <div className="relative mx-auto w-full max-w-7xl py-0 sm:py-4 lg:py-8">
+        <RegistrationForm />
       </div>
     </main>
   );
