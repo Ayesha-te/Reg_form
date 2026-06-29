@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# The backend lives beside this frontend repo.
+/form_backend/
 dist
 dist-ssr
 .output
