@@ -1,9 +1,6 @@
-const DEFAULT_API_BASE_URL = "https://form-backend-sepia.vercel.app";
 const SUPABASE_STORAGE_BUCKET = "registration-photos";
 
-export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL
-).replace(/\/$/, "");
+export const API_BASE_URL = "";
 
 export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
 
