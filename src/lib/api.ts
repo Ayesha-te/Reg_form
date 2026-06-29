@@ -1,5 +1,5 @@
 const SUPABASE_STORAGE_BUCKET = "registration-photos";
-const DEPLOYED_API_BASE_URL = "https://form-backend.vercel.app";
+const DEPLOYED_API_BASE_URL = "https://form-backend-sepia.vercel.app";
 
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
