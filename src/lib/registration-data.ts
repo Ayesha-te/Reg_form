@@ -1,26 +1,19 @@
-export const COUNTRY_CITY_MAP: Record<string, string[]> = {
-  UAE: ["Dubai", "Sharjah", "Abu Dhabi", "Ajman", "Ras Al Khaimah"],
-  India: ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Kolkata"],
-  USA: ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"],
-  UK: ["London", "Manchester", "Birmingham", "Liverpool", "Edinburgh"],
-  Canada: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"],
-  Australia: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"],
-};
+export const JERSEY_SIZE_OPTIONS = ["Small", "Medium", "Large", "XL", "XXL", "3XL", "4XL"];
 
-export const COUNTRIES = Object.keys(COUNTRY_CITY_MAP);
+export const PREFERRED_SLEEVE_OPTIONS = ["Full Sleeves", "Half Sleeves"];
 
-export const INTEREST_OPTIONS = [
-  "Sports",
-  "Music",
-  "Travel",
-  "Reading",
-  "Gaming",
-  "Cooking",
-  "Movies",
-  "Technology",
+export const AVAILABILITY_OPTIONS = ["Available all matches", "Missing few matches"];
+
+export const NOT_AVAILABLE_ON_OPTIONS = [
+  "Match 1",
+  "Match 2",
+  "Match 3",
+  "Match 4",
+  "Match 5",
+  "Match 6",
+  "Match 7",
+  "Match 8",
 ];
 
-export const GENDER_OPTIONS = ["Male", "Female", "Other"] as const;
-
-export const MAX_FILE_SIZE = 1024 * 1024;
+export const MAX_FILE_SIZE = 2 * 1024 * 1024;
 export const ALLOWED_FILE_TYPES = ["image/jpeg", "image/jpg", "image/png"];

@@ -22,7 +22,9 @@ export type RegistrationResponse = {
   message: string;
   registration: {
     id: number;
-    fullName: string;
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
     photoPath: string;
     createdAt: string;
   };
@@ -30,16 +32,37 @@ export type RegistrationResponse = {
 
 export type RegistrationSubmission = {
   id: string | number;
+  firstName?: string;
+  first_name?: string;
+  lastName?: string;
+  last_name?: string;
   fullName?: string;
   full_name?: string;
   email: string;
   mobile: string;
+  whatsappNumber?: string;
+  whatsapp_number?: string;
+  jerseyName?: string;
+  jersey_name?: string;
+  jerseyNumber?: string;
+  jersey_number?: string;
+  jerseySize?: string;
+  jersey_size?: string;
+  preferredSleeves?: string;
+  preferred_sleeves?: string;
+  currentClub?: string;
+  current_club?: string;
+  availability?: string;
+  notAvailableOn?: string[];
+  not_available_on?: string[];
+  feeAgreement?: boolean;
+  fee_agreement?: boolean;
   dateOfBirth?: string;
   date_of_birth?: string;
-  gender: string;
+  gender?: string;
   interests?: string[];
-  country: string;
-  city: string;
+  country?: string;
+  city?: string;
   photoPath?: string | null;
   photo_path?: string | null;
   photoUrl?: string | null;

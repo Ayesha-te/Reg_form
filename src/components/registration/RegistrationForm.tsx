@@ -10,28 +10,27 @@ import { useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import {
   AlertCircle,
-  CalendarDays,
   CheckCircle2,
-  Heart,
+  FileText,
   ImagePlus,
   Loader2,
   Mail,
-  MapPin,
   Phone,
+  Shirt,
   ShieldCheck,
   Sparkles,
   Upload,
   UserRound,
+  UsersRound,
   X,
   type LucideIcon,
 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -42,52 +41,93 @@ import {
 import { toast } from "sonner";
 import {
   ALLOWED_FILE_TYPES,
-  COUNTRIES,
-  COUNTRY_CITY_MAP,
-  GENDER_OPTIONS,
-  INTEREST_OPTIONS,
+  AVAILABILITY_OPTIONS,
+  JERSEY_SIZE_OPTIONS,
   MAX_FILE_SIZE,
+  NOT_AVAILABLE_ON_OPTIONS,
+  PREFERRED_SLEEVE_OPTIONS,
 } from "@/lib/registration-data";
 import { API_BASE_URL, type ApiErrorResponse, type RegistrationResponse } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-const schema = z.object({
-  fullName: z.string().trim().min(2, "Full name must be at least 2 characters").max(100),
-  email: z.string().trim().email("Enter a valid email").max(255),
-  mobile: z
-    .string()
-    .trim()
-    .regex(/^\+?[0-9\s-]{7,15}$/, "Enter a valid mobile number (7-15 digits)"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
-  gender: z.enum(["Male", "Female", "Other"], { message: "Select a gender" }),
-  interests: z.array(z.string()).min(1, "Pick at least one interest"),
-  country: z.string().min(1, "Select a country"),
-  city: z.string().min(1, "Select a city"),
-});
+const phoneRegex = /^(\+9715\d{8}|\d{10})$/;
+
+const schema = z
+  .object({
+    firstName: z.string().trim().min(1, "First name is required").max(80),
+    lastName: z.string().trim().min(1, "Last name is required").max(80),
+    mobile: z
+      .string()
+      .trim()
+      .regex(phoneRegex, "Use 10 digits or UAE format +9715XXXXXXXX"),
+    email: z.string().trim().email("Enter a valid email address").max(255),
+    whatsappNumber: z
+      .string()
+      .trim()
+      .regex(phoneRegex, "Use 10 digits or UAE format +9715XXXXXXXX"),
+    jerseyName: z.string().trim().min(1, "Name of jersey is required").max(80),
+    jerseyNumber: z
+      .string()
+      .trim()
+      .regex(/^\d{1,3}$/, "Jersey number must be whole numbers only"),
+    jerseySize: z.enum(["Small", "Medium", "Large", "XL", "XXL", "3XL", "4XL"], {
+      message: "Select a jersey size",
+    }),
+    preferredSleeves: z.enum(["Full Sleeves", "Half Sleeves"], {
+      message: "Select preferred sleeves",
+    }),
+    currentClub: z.string().trim().min(1, "Current club/team is required").max(120),
+    availability: z.enum(["Available all matches", "Missing few matches"], {
+      message: "Select availability",
+    }),
+    notAvailableOn: z.array(z.string()),
+    feeAgreement: z.literal(true, {
+      errorMap: () => ({ message: "You must agree to the registration and match fees" }),
+    }),
+  })
+  .superRefine((values, ctx) => {
+    if (values.availability === "Missing few matches" && values.notAvailableOn.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["notAvailableOn"],
+        message: "Select at least one match you are not available on",
+      });
+    }
+  });
 
 type FormState = {
-  fullName: string;
-  email: string;
+  firstName: string;
+  lastName: string;
   mobile: string;
-  dateOfBirth: string;
-  gender: string;
-  interests: string[];
-  country: string;
-  city: string;
+  email: string;
+  whatsappNumber: string;
+  jerseyName: string;
+  jerseyNumber: string;
+  jerseySize: string;
+  preferredSleeves: string;
+  currentClub: string;
+  availability: string;
+  notAvailableOn: string[];
+  feeAgreement: boolean;
 };
 
 const initial: FormState = {
-  fullName: "",
-  email: "",
+  firstName: "",
+  lastName: "",
   mobile: "",
-  dateOfBirth: "",
-  gender: "",
-  interests: [],
-  country: "",
-  city: "",
+  email: "",
+  whatsappNumber: "",
+  jerseyName: "",
+  jerseyNumber: "",
+  jerseySize: "",
+  preferredSleeves: "",
+  currentClub: "",
+  availability: "",
+  notAvailableOn: [],
+  feeAgreement: false,
 };
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 14;
 
 type FieldStatus = "neutral" | "valid" | "error";
 
@@ -107,62 +147,50 @@ export function RegistrationForm() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-
-  const allowTilt = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(pointer: fine)").matches &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
-
-  function handleCardPointerMove(event: React.PointerEvent<HTMLFormElement>) {
-    if (!allowTilt) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const px = (event.clientX - rect.left) / rect.width;
-    const py = (event.clientY - rect.top) / rect.height;
-    setTilt({ x: (0.5 - py) * 4, y: (px - 0.5) * 4 });
-  }
-
-  function handleCardPointerLeave() {
-    setTilt({ x: 0, y: 0 });
-  }
-
-  const cities = useMemo(
-    () => (values.country ? (COUNTRY_CITY_MAP[values.country] ?? []) : []),
-    [values.country],
-  );
 
   const completionCount = useMemo(() => {
     const completedFields = [
-      values.fullName,
-      values.email,
+      values.firstName,
+      values.lastName,
       values.mobile,
-      values.dateOfBirth,
-      values.gender,
-      values.country,
-      values.city,
+      values.email,
+      values.whatsappNumber,
+      values.jerseyName,
+      values.jerseyNumber,
+      values.jerseySize,
+      values.preferredSleeves,
+      values.currentClub,
+      values.availability,
     ].filter(Boolean).length;
 
-    return completedFields + (values.interests.length > 0 ? 1 : 0) + (file ? 1 : 0);
+    const notAvailableComplete =
+      values.availability === "Available all matches" || values.notAvailableOn.length > 0 ? 1 : 0;
+
+    return completedFields + notAvailableComplete + (file ? 1 : 0) + (values.feeAgreement ? 1 : 0);
   }, [file, values]);
 
   const progressPercent = Math.round((completionCount / TOTAL_STEPS) * 100);
 
-  // Purely presentational — lets each section badge light up once that
-  // section is filled in and currently error-free. Does not affect what
-  // is required to submit.
-  const personalDetailsComplete =
-    Boolean(values.fullName && values.email && values.mobile && values.dateOfBirth && values.gender) &&
-    !errors.fullName &&
-    !errors.email &&
+  const playerComplete =
+    Boolean(values.firstName && values.lastName && values.mobile && values.email && values.whatsappNumber) &&
+    !errors.firstName &&
+    !errors.lastName &&
     !errors.mobile &&
-    !errors.dateOfBirth &&
-    !errors.gender;
-  const interestsComplete = values.interests.length > 0 && !errors.interests;
-  const locationComplete = Boolean(values.country && values.city) && !errors.country && !errors.city;
-  const photoComplete = Boolean(file) && !fileError;
+    !errors.email &&
+    !errors.whatsappNumber;
+  const jerseyComplete =
+    Boolean(values.jerseyName && values.jerseyNumber && values.jerseySize && values.preferredSleeves) &&
+    !errors.jerseyName &&
+    !errors.jerseyNumber &&
+    !errors.jerseySize &&
+    !errors.preferredSleeves;
+  const availabilityComplete =
+    Boolean(values.currentClub && values.availability) &&
+    (values.availability === "Available all matches" || values.notAvailableOn.length > 0) &&
+    !errors.currentClub &&
+    !errors.availability &&
+    !errors.notAvailableOn;
+  const finalComplete = Boolean(file && values.feeAgreement) && !fileError && !errors.feeAgreement;
 
   useEffect(() => {
     if (!file) {
@@ -180,7 +208,7 @@ export function RegistrationForm() {
     const parsed = schema.safeParse(valuesToValidate);
     if (parsed.success) return null;
 
-    const issue = parsed.error.issues.find((issue) => issue.path[0] === key);
+    const issue = parsed.error.issues.find((fieldIssue) => fieldIssue.path[0] === key);
     return issue?.message ?? null;
   }
 
@@ -188,54 +216,45 @@ export function RegistrationForm() {
     setTouched((previousTouched) =>
       previousTouched[key] ? previousTouched : { ...previousTouched, [key]: true },
     );
+    setFieldError(key, values);
+  }
+
+  function setFieldError<K extends keyof FormState>(key: K, valuesToValidate: FormState) {
+    setErrors((previousErrors) => {
+      const nextErrors = { ...previousErrors };
+      const errorMessage = validateField(key, valuesToValidate);
+
+      if (errorMessage) {
+        nextErrors[key as string] = errorMessage;
+      } else {
+        delete nextErrors[key as string];
+      }
+
+      return nextErrors;
+    });
   }
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
-    updateMany({ [key]: value } as Partial<FormState>);
-  }
+    const nextValues = { ...values, [key]: value };
 
-  // Applies one or more field changes from the same snapshot of state, so
-  // changes like "set country, then clear city" land together instead of
-  // racing each other (the bug behind city silently becoming unselectable).
-  function updateMany(patch: Partial<FormState>) {
-    const nextValues = { ...values, ...patch };
+    if (key === "availability" && value === "Available all matches") {
+      nextValues.notAvailableOn = [];
+    }
+
     setValues(nextValues);
     setApiError(null);
-    setErrors((previousErrors) => {
-      const nextErrors = { ...previousErrors };
-      for (const key of Object.keys(patch) as (keyof FormState)[]) {
-        const errorMessage = validateField(key, nextValues);
-        if (errorMessage) {
-          nextErrors[key as string] = errorMessage;
-        } else {
-          delete nextErrors[key as string];
-        }
-      }
-      return nextErrors;
-    });
+
+    if (touched[key as string] || errors[key as string]) setFieldError(key, nextValues);
+    if (key === "availability" || key === "notAvailableOn") setFieldError("notAvailableOn", nextValues);
   }
 
-  function toggleInterest(interestName: string) {
-    markTouched("interests");
-    const nextInterests = values.interests.includes(interestName)
-      ? values.interests.filter((interest) => interest !== interestName)
-      : [...values.interests, interestName];
+  function toggleNotAvailableOn(matchName: string) {
+    const nextMatches = values.notAvailableOn.includes(matchName)
+      ? values.notAvailableOn.filter((item) => item !== matchName)
+      : [...values.notAvailableOn, matchName];
 
-    const nextValues = { ...values, interests: nextInterests };
-    setValues(nextValues);
-    setApiError(null);
-    setErrors((previousErrors) => {
-      const nextErrors = { ...previousErrors };
-      const errorMessage = validateField("interests", nextValues);
-
-      if (errorMessage) {
-        nextErrors.interests = errorMessage;
-      } else {
-        delete nextErrors.interests;
-      }
-
-      return nextErrors;
-    });
+    setTouched((previousTouched) => ({ ...previousTouched, notAvailableOn: true }));
+    update("notAvailableOn", nextMatches);
   }
 
   function handleFile(selectedFile: File | null) {
@@ -253,9 +272,9 @@ export function RegistrationForm() {
       return;
     }
 
-    if (selectedFile.size >= MAX_FILE_SIZE) {
+    if (selectedFile.size > MAX_FILE_SIZE) {
       setFile(null);
-      setFileError("File must be smaller than 1 MB");
+      setFileError("File must be 2 MB or smaller");
       return;
     }
 
@@ -278,24 +297,20 @@ export function RegistrationForm() {
         const key = issue.path[0] as string;
         if (key && !fieldErrors[key]) fieldErrors[key] = issue.message;
       }
+
       setErrors(fieldErrors);
-      setTouched((previousTouched) => ({
-        ...previousTouched,
-        fullName: true,
-        email: true,
-        mobile: true,
-        dateOfBirth: true,
-        gender: true,
-        interests: true,
-        country: true,
-        city: true,
-      }));
+      setTouched(
+        Object.keys(initial).reduce<Record<string, boolean>>((accumulator, key) => {
+          accumulator[key] = true;
+          return accumulator;
+        }, {}),
+      );
       toast.error("Please fix the highlighted fields");
       return;
     }
 
     if (!file) {
-      const message = "Upload a JPG or PNG photo under 1 MB";
+      const message = "Upload a clear headshot photo under 2 MB";
       setFileError(message);
       toast.error(message);
       return;
@@ -307,14 +322,22 @@ export function RegistrationForm() {
     }
 
     const formData = new FormData();
-    formData.append("fullName", parsed.data.fullName);
-    formData.append("email", parsed.data.email);
+    formData.append("firstName", parsed.data.firstName);
+    formData.append("lastName", parsed.data.lastName);
+    formData.append("fullName", `${parsed.data.firstName} ${parsed.data.lastName}`);
     formData.append("mobile", parsed.data.mobile);
-    formData.append("dateOfBirth", parsed.data.dateOfBirth);
-    formData.append("gender", parsed.data.gender);
-    parsed.data.interests.forEach((interest) => formData.append("interests", interest));
-    formData.append("country", parsed.data.country);
-    formData.append("city", parsed.data.city);
+    formData.append("email", parsed.data.email);
+    formData.append("whatsappNumber", parsed.data.whatsappNumber);
+    formData.append("jerseyName", parsed.data.jerseyName);
+    formData.append("jerseyNumber", parsed.data.jerseyNumber);
+    formData.append("jerseySize", parsed.data.jerseySize);
+    formData.append("preferredSleeves", parsed.data.preferredSleeves);
+    formData.append("currentClub", parsed.data.currentClub);
+    formData.append("availability", parsed.data.availability);
+    parsed.data.notAvailableOn.forEach((matchName) =>
+      formData.append("notAvailableOn", matchName),
+    );
+    formData.append("feeAgreement", String(parsed.data.feeAgreement));
     formData.append("photo", file);
 
     setSubmitting(true);
@@ -360,65 +383,33 @@ export function RegistrationForm() {
   }
 
   return (
-    <div className="relative isolate [perspective:1800px]">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-x-8 -inset-y-10 -z-10 overflow-hidden rounded-[3rem] sm:-inset-x-14 sm:-inset-y-16"
-      >
-        <div
-          className="absolute inset-0 animate-aurora-drift opacity-90"
-          style={{ background: "var(--gradient-surface)", backgroundSize: "180% 180%" }}
-        />
-      </div>
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-card/95 p-5 shadow-[var(--shadow-elegant)] ring-1 ring-primary/5 backdrop-blur-xl sm:p-9"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-primary opacity-70" />
+      <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-28 left-10 h-52 w-52 rounded-full bg-cyan-400/10 blur-3xl" />
 
-      <form
-        onSubmit={onSubmit}
-        onPointerMove={handleCardPointerMove}
-        onPointerLeave={handleCardPointerLeave}
-        noValidate
-        style={{
-          transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-          transformStyle: "preserve-3d",
-          transition: "transform 250ms ease-out",
-        }}
-        className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-card/95 p-5 shadow-[var(--shadow-elegant)] ring-1 ring-primary/5 backdrop-blur-xl sm:p-9"
-      >
-        <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 left-10 h-52 w-52 rounded-full bg-cyan-400/10 blur-3xl" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-primary opacity-60" />
-
-        <div className="relative" style={{ transform: "translateZ(40px)" }}>
-          <div className="mb-8 flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-4">
-              <div aria-hidden className="relative hidden h-14 w-14 shrink-0 [perspective:600px] sm:block">
-                <div
-                  className="absolute inset-0 animate-orb-float rounded-full"
-                  style={{
-                    background:
-                      "radial-gradient(circle at 30% 28%, oklch(0.9 0.1 250 / 95%), var(--primary) 55%, oklch(0.32 0.16 264) 100%)",
-                    boxShadow:
-                      "0 16px 30px -10px color-mix(in oklab, var(--primary) 55%, transparent), inset -5px -5px 10px rgb(0 0 0 / 25%), inset 5px 6px 8px rgb(255 255 255 / 45%)",
-                  }}
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Smart, guided registration
-                </div>
-                <h2 className="text-shimmer font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
-                  Tell us about yourself
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Four quick sections — we&apos;ll flag anything that needs a second look as you go.
-                </p>
-              </div>
+      <div className="relative">
+        <div className="mb-8 flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              Player registration
             </div>
+            <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
+              Indoor Champions League 8.0
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Complete all required player, jersey, availability, and payment agreement details.
+            </p>
+          </div>
 
-            <div className="min-w-44 rounded-2xl border border-border/70 bg-background/80 p-3.5">
+          <div className="min-w-48 rounded-2xl border border-border/70 bg-background/80 p-3.5">
             <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-              <span>Profile completeness</span>
+              <span>Form completeness</span>
               {progressPercent === 100 ? (
                 <CheckCircle2 className="h-4 w-4 text-success" />
               ) : (
@@ -438,10 +429,7 @@ export function RegistrationForm() {
         </div>
 
         {apiError && (
-          <Alert
-            variant="destructive"
-            className="mb-6 animate-in fade-in-0 slide-in-from-top-1 bg-destructive/5"
-          >
+          <Alert variant="destructive" className="mb-6 bg-destructive/5">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{apiError}</AlertDescription>
           </Alert>
@@ -452,36 +440,40 @@ export function RegistrationForm() {
             index={1}
             total={4}
             icon={UserRound}
-            title="Personal details"
-            description="Who you are and how we can reach you."
-            complete={personalDetailsComplete}
+            title="Player details"
+            description="Player identity and contact information."
+            complete={playerComplete}
           >
-            <Field label="Full name" error={touched.fullName ? errors.fullName : undefined} required>
+            <Field label="First Name" error={touched.firstName ? errors.firstName : undefined} required>
               <StatusInput
                 icon={UserRound}
-                status={fieldStatus(Boolean(touched.fullName), errors.fullName, Boolean(values.fullName))}
-                value={values.fullName}
-                onChange={(event) => update("fullName", event.target.value)}
-                onBlur={() => markTouched("fullName")}
-                placeholder="Jane Doe"
-                autoComplete="name"
+                status={fieldStatus(Boolean(touched.firstName), errors.firstName, Boolean(values.firstName))}
+                value={values.firstName}
+                onChange={(event) => update("firstName", event.target.value)}
+                onBlur={() => markTouched("firstName")}
+                placeholder="First name"
+                autoComplete="given-name"
               />
             </Field>
 
-            <Field label="Email address" error={touched.email ? errors.email : undefined} required>
+            <Field label="Last Name" error={touched.lastName ? errors.lastName : undefined} required>
               <StatusInput
-                icon={Mail}
-                type="email"
-                status={fieldStatus(Boolean(touched.email), errors.email, Boolean(values.email))}
-                value={values.email}
-                onChange={(event) => update("email", event.target.value)}
-                onBlur={() => markTouched("email")}
-                placeholder="jane@example.com"
-                autoComplete="email"
+                icon={UserRound}
+                status={fieldStatus(Boolean(touched.lastName), errors.lastName, Boolean(values.lastName))}
+                value={values.lastName}
+                onChange={(event) => update("lastName", event.target.value)}
+                onBlur={() => markTouched("lastName")}
+                placeholder="Last name"
+                autoComplete="family-name"
               />
             </Field>
 
-            <Field label="Mobile number" error={touched.mobile ? errors.mobile : undefined} required>
+            <Field
+              label="Mobile Number"
+              hint="Example: +9715XXXXXXXX or 10 digits"
+              error={touched.mobile ? errors.mobile : undefined}
+              required
+            >
               <StatusInput
                 icon={Phone}
                 type="tel"
@@ -489,169 +481,219 @@ export function RegistrationForm() {
                 value={values.mobile}
                 onChange={(event) => update("mobile", event.target.value)}
                 onBlur={() => markTouched("mobile")}
-                placeholder="+971 50 123 4567"
+                placeholder="+9715XXXXXXXX"
                 autoComplete="tel"
               />
             </Field>
 
-            <Field
-              label="Date of birth"
-              error={touched.dateOfBirth ? errors.dateOfBirth : undefined}
-              required
-            >
-              <div className="relative">
-                <CalendarDays className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="date"
-                  value={values.dateOfBirth}
-                  onChange={(event) => update("dateOfBirth", event.target.value)}
-                  onBlur={() => markTouched("dateOfBirth")}
-                  max={new Date().toISOString().split("T")[0]}
-                  className={cn(
-                    "h-12 rounded-xl bg-background/80 pl-10",
-                    touched.dateOfBirth && errors.dateOfBirth && "border-destructive/60",
-                    touched.dateOfBirth && !errors.dateOfBirth && values.dateOfBirth && "border-success/50",
-                  )}
-                />
-              </div>
+            <Field label="Email Address" error={touched.email ? errors.email : undefined} required>
+              <StatusInput
+                icon={Mail}
+                type="email"
+                status={fieldStatus(Boolean(touched.email), errors.email, Boolean(values.email))}
+                value={values.email}
+                onChange={(event) => update("email", event.target.value)}
+                onBlur={() => markTouched("email")}
+                placeholder="name@example.com"
+                autoComplete="email"
+              />
             </Field>
 
-            <Field label="Gender" error={touched.gender ? errors.gender : undefined} required className="sm:col-span-2">
-              <RadioGroup
-                value={values.gender}
-                onValueChange={(value) => {
-                  markTouched("gender");
-                  update("gender", value);
-                }}
-                className="grid grid-cols-1 gap-2 sm:grid-cols-3"
-              >
-                {GENDER_OPTIONS.map((genderOption) => {
-                  const checked = values.gender === genderOption;
-                  return (
-                    <label
-                      key={genderOption}
-                      className={cn(
-                        "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-all",
-                        checked
-                          ? "border-primary bg-primary/5 shadow-sm ring-2 ring-primary/10"
-                          : "border-input bg-background/80 hover:-translate-y-0.5 hover:bg-accent",
-                      )}
-                    >
-                      <RadioGroupItem value={genderOption} id={`gender-${genderOption}`} />
-                      <span className="font-medium">{genderOption}</span>
-                      {checked && <CheckCircle2 className="ml-auto h-4 w-4 text-primary" />}
-                    </label>
-                  );
-                })}
-              </RadioGroup>
+            <Field
+              label="Whatsapp Number"
+              error={touched.whatsappNumber ? errors.whatsappNumber : undefined}
+              required
+              className="sm:col-span-2"
+            >
+              <StatusInput
+                icon={Phone}
+                type="tel"
+                status={fieldStatus(
+                  Boolean(touched.whatsappNumber),
+                  errors.whatsappNumber,
+                  Boolean(values.whatsappNumber),
+                )}
+                value={values.whatsappNumber}
+                onChange={(event) => update("whatsappNumber", event.target.value)}
+                onBlur={() => markTouched("whatsappNumber")}
+                placeholder="+9715XXXXXXXX"
+                autoComplete="tel"
+              />
             </Field>
           </Section>
 
           <Section
             index={2}
             total={4}
-            icon={Heart}
-            title="Interests"
-            description="Pick anything that sounds like you — at least one."
-            complete={interestsComplete}
+            icon={Shirt}
+            title="Jersey details"
+            description="Name, number, size, and sleeve preference."
+            complete={jerseyComplete}
           >
+            <Field label="Name of Jersey" error={touched.jerseyName ? errors.jerseyName : undefined} required>
+              <StatusInput
+                icon={Shirt}
+                status={fieldStatus(Boolean(touched.jerseyName), errors.jerseyName, Boolean(values.jerseyName))}
+                value={values.jerseyName}
+                onChange={(event) => update("jerseyName", event.target.value)}
+                onBlur={() => markTouched("jerseyName")}
+                placeholder="Name on jersey"
+              />
+            </Field>
+
             <Field
-              label="Interests"
-              error={touched.interests ? errors.interests : undefined}
+              label="Number on Jersey"
+              error={touched.jerseyNumber ? errors.jerseyNumber : undefined}
               required
-              className="sm:col-span-2"
             >
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {INTEREST_OPTIONS.map((interestOption) => {
-                  const checked = values.interests.includes(interestOption);
-                  return (
-                    <label
-                      key={interestOption}
-                      className={cn(
-                        "flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-3 text-sm transition-all",
-                        checked
-                          ? "border-primary bg-primary/5 shadow-sm ring-2 ring-primary/10"
-                          : "border-input bg-background/80 hover:-translate-y-0.5 hover:bg-accent",
-                      )}
-                    >
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={() => toggleInterest(interestOption)}
-                      />
-                      <span className="font-medium">{interestOption}</span>
-                    </label>
-                  );
-                })}
-              </div>
+              <StatusInput
+                icon={FileText}
+                inputMode="numeric"
+                status={fieldStatus(
+                  Boolean(touched.jerseyNumber),
+                  errors.jerseyNumber,
+                  Boolean(values.jerseyNumber),
+                )}
+                value={values.jerseyNumber}
+                onChange={(event) => update("jerseyNumber", event.target.value)}
+                onBlur={() => markTouched("jerseyNumber")}
+                placeholder="10"
+              />
+            </Field>
+
+            <Field label="Jersey Size" error={touched.jerseySize ? errors.jerseySize : undefined} required>
+              <Select
+                value={values.jerseySize}
+                onValueChange={(value) => {
+                  setTouched((previousTouched) => ({ ...previousTouched, jerseySize: true }));
+                  update("jerseySize", value);
+                }}
+              >
+                <SelectTrigger className="h-12 rounded-xl bg-background/80">
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {JERSEY_SIZE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field
+              label="Preferred Sleeves"
+              error={touched.preferredSleeves ? errors.preferredSleeves : undefined}
+              required
+            >
+              <Select
+                value={values.preferredSleeves}
+                onValueChange={(value) => {
+                  setTouched((previousTouched) => ({ ...previousTouched, preferredSleeves: true }));
+                  update("preferredSleeves", value);
+                }}
+              >
+                <SelectTrigger className="h-12 rounded-xl bg-background/80">
+                  <SelectValue placeholder="Select sleeves" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PREFERRED_SLEEVE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
           </Section>
 
           <Section
             index={3}
             total={4}
-            icon={MapPin}
-            title="Location"
-            description="Where you're joining us from."
-            complete={locationComplete}
+            icon={UsersRound}
+            title="Availability"
+            description="Current team and match availability."
+            complete={availabilityComplete}
           >
-            <Field label="Country" error={touched.country ? errors.country : undefined} required>
+            <Field
+              label="Your current club / team?"
+              error={touched.currentClub ? errors.currentClub : undefined}
+              required
+            >
+              <StatusInput
+                icon={UsersRound}
+                status={fieldStatus(Boolean(touched.currentClub), errors.currentClub, Boolean(values.currentClub))}
+                value={values.currentClub}
+                onChange={(event) => update("currentClub", event.target.value)}
+                onBlur={() => markTouched("currentClub")}
+                placeholder="Club or team name"
+              />
+            </Field>
+
+            <Field label="Availability" error={touched.availability ? errors.availability : undefined} required>
               <Select
-                value={values.country}
+                value={values.availability}
                 onValueChange={(value) => {
-                  markTouched("country");
-                  updateMany({ country: value, city: "" });
+                  setTouched((previousTouched) => ({ ...previousTouched, availability: true }));
+                  update("availability", value);
                 }}
               >
                 <SelectTrigger className="h-12 rounded-xl bg-background/80">
-                  <SelectValue placeholder="Select a country" />
+                  <SelectValue placeholder="Select availability" />
                 </SelectTrigger>
                 <SelectContent>
-                  {COUNTRIES.map((countryOption) => (
-                    <SelectItem key={countryOption} value={countryOption}>
-                      {countryOption}
+                  {AVAILABILITY_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
 
-            <Field label="City" error={touched.city ? errors.city : undefined} required>
-              <Select
-                value={values.city}
-                onValueChange={(value) => {
-                  markTouched("city");
-                  update("city", value);
-                }}
-                disabled={!values.country}
+            {values.availability === "Missing few matches" && (
+              <Field
+                label="Not Available On"
+                error={touched.notAvailableOn ? errors.notAvailableOn : undefined}
+                required
+                className="sm:col-span-2"
               >
-                <SelectTrigger className="h-12 rounded-xl bg-background/80">
-                  <SelectValue
-                    placeholder={values.country ? "Select a city" : "Pick a country first"}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((cityOption) => (
-                    <SelectItem key={cityOption} value={cityOption}>
-                      {cityOption}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {NOT_AVAILABLE_ON_OPTIONS.map((option) => {
+                    const checked = values.notAvailableOn.includes(option);
+                    return (
+                      <label
+                        key={option}
+                        className={cn(
+                          "flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition-all",
+                          checked
+                            ? "border-primary bg-primary/5 shadow-sm ring-2 ring-primary/10"
+                            : "border-input bg-background/80 hover:-translate-y-0.5 hover:bg-accent",
+                        )}
+                      >
+                        <Checkbox checked={checked} onCheckedChange={() => toggleNotAvailableOn(option)} />
+                        <span className="font-medium">{option}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </Field>
+            )}
           </Section>
 
           <Section
             index={4}
             total={4}
             icon={ImagePlus}
-            title="Profile photo"
-            description="A clear photo helps us verify it's really you."
-            complete={photoComplete}
+            title="Photo and fees"
+            description="Upload a clear headshot and confirm the fee agreement."
+            complete={finalComplete}
             isLast
           >
             <Field
-              label="Upload photo"
-              hint="Required. JPG, JPEG, or PNG. Max 1 MB."
+              label="Upload Photo"
+              hint="Required clear headshot. JPG, JPEG, or PNG. Max 2 MB."
               error={fileError ?? errors.photo}
               required
               className="sm:col-span-2"
@@ -701,9 +743,9 @@ export function RegistrationForm() {
                   </span>
                   <span>
                     <span className="font-semibold text-foreground">Click to upload</span> or drag
-                    your photo here
+                    your headshot here
                   </span>
-                  <span className="text-xs">Image is validated again on the Node server.</span>
+                  <span className="text-xs">Max size allowed: 2 MB.</span>
                   <input
                     type="file"
                     className="hidden"
@@ -712,6 +754,33 @@ export function RegistrationForm() {
                   />
                 </label>
               )}
+            </Field>
+
+            <Field
+              label="Fee agreement"
+              error={touched.feeAgreement ? errors.feeAgreement : undefined}
+              required
+              className="sm:col-span-2"
+            >
+              <label
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 rounded-2xl border bg-background/80 p-4 text-sm transition-all",
+                  values.feeAgreement
+                    ? "border-primary bg-primary/5 ring-2 ring-primary/10"
+                    : "border-input hover:bg-accent",
+                )}
+              >
+                <Checkbox
+                  checked={values.feeAgreement}
+                  onCheckedChange={(checked) => {
+                    setTouched((previousTouched) => ({ ...previousTouched, feeAgreement: true }));
+                    update("feeAgreement", checked === true);
+                  }}
+                />
+                <span className="leading-6">
+                  I agree to pay registration fees of AED 100 and match fees of AED 20 per match.
+                </span>
+              </label>
             </Field>
           </Section>
         </div>
@@ -729,9 +798,8 @@ export function RegistrationForm() {
           <ShieldCheck className="h-3.5 w-3.5 text-success" />
           <span>Your details are encrypted and only used to verify your registration.</span>
         </div>
-        </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }
 

@@ -25,6 +25,7 @@ import {
   type RegistrationsListResponse,
   type RegistrationSubmission,
 } from "@/lib/api";
+import logoUrl from "@/components/logo.png";
 
 export const Route = createFileRoute("/submissions")({
   head: () => ({
@@ -37,14 +38,19 @@ export const Route = createFileRoute("/submissions")({
 });
 
 const columns = [
-  "Name",
+  "First Name",
+  "Last Name",
   "Email",
   "Mobile Number",
-  "Date of Birth",
-  "Gender",
-  "Interests",
-  "Country",
-  "City",
+  "Whatsapp Number",
+  "Jersey Name",
+  "Jersey Size",
+  "Jersey Number",
+  "Preferred Sleeves",
+  "Current Club / Team",
+  "Availability",
+  "Not Available On",
+  "Fee Agreement",
   "Created At",
   "File",
 ];
@@ -95,10 +101,17 @@ function SubmissionsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/95 px-4 py-5 shadow-sm sm:px-8">
+      <header className="border-b border-border bg-card/95 px-4 py-3 shadow-sm sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/" className="text-2xl font-black tracking-tight text-foreground">
-            Registration
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src={logoUrl}
+              alt="Event logo"
+              className="h-16 w-24 shrink-0 object-contain"
+            />
+            <span className="text-2xl font-black tracking-tight text-foreground">
+              Indoor Champions League 8.0
+            </span>
           </Link>
 
           <nav className="flex items-center gap-4 text-sm font-semibold">
@@ -158,7 +171,7 @@ function SubmissionsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-[1180px] w-full border-collapse text-left">
+            <table className="min-w-[1900px] w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-border">
                   {columns.map((column) => (
@@ -189,7 +202,10 @@ function SubmissionsPage() {
                   </tr>
                 ) : (
                   submissions.map((submission) => {
-                    const name = submission.fullName ?? submission.full_name ?? "Unknown";
+                    const firstName = submission.firstName ?? submission.first_name ?? "";
+                    const lastName = submission.lastName ?? submission.last_name ?? "";
+                    const fallbackName = submission.fullName ?? submission.full_name ?? "Unknown";
+                    const displayName = [firstName, lastName].filter(Boolean).join(" ") || fallbackName;
                     const fileUrl = getFileUrl(submission);
 
                     return (
@@ -198,7 +214,10 @@ function SubmissionsPage() {
                         className="border-b border-border last:border-b-0"
                       >
                         <td className="px-6 py-6 align-middle text-lg font-bold text-foreground">
-                          {name}
+                          {firstName || fallbackName}
+                        </td>
+                        <td className="px-6 py-6 align-middle text-lg font-bold text-foreground">
+                          {lastName || "-"}
                         </td>
                         <td className="px-6 py-6 align-middle text-lg text-slate-600">
                           {submission.email}
@@ -207,25 +226,41 @@ function SubmissionsPage() {
                           {submission.mobile}
                         </td>
                         <td className="px-6 py-6 align-middle text-lg text-slate-600">
-                          {formatDate(submission.dateOfBirth ?? submission.date_of_birth)}
+                          {submission.whatsappNumber ?? submission.whatsapp_number ?? "-"}
                         </td>
                         <td className="px-6 py-6 align-middle text-lg text-slate-600">
-                          {submission.gender}
+                          {submission.jerseyName ?? submission.jersey_name ?? "-"}
+                        </td>
+                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                          {submission.jerseySize ?? submission.jersey_size ?? "-"}
+                        </td>
+                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                          {submission.jerseyNumber ?? submission.jersey_number ?? "-"}
+                        </td>
+                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                          {submission.preferredSleeves ?? submission.preferred_sleeves ?? "-"}
+                        </td>
+                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                          {submission.currentClub ?? submission.current_club ?? "-"}
+                        </td>
+                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                          {submission.availability ?? "-"}
                         </td>
                         <td className="px-6 py-6 align-middle">
-                          <div className="flex max-w-56 flex-wrap gap-1.5">
-                            {(submission.interests ?? []).map((interest) => (
-                              <Badge key={interest} variant="secondary" className="rounded-full">
-                                {interest}
-                              </Badge>
-                            ))}
+                          <div className="flex max-w-64 flex-wrap gap-1.5">
+                            {(submission.notAvailableOn ?? submission.not_available_on ?? []).length > 0 ? (
+                              (submission.notAvailableOn ?? submission.not_available_on ?? []).map((matchName) => (
+                                <Badge key={matchName} variant="secondary" className="rounded-full">
+                                  {matchName}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-lg text-slate-600">-</span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-6 align-middle text-lg text-slate-600">
-                          {submission.country}
-                        </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
-                          {submission.city}
+                          {submission.feeAgreement ?? submission.fee_agreement ? "Accepted" : "-"}
                         </td>
                         <td className="px-6 py-6 align-middle text-lg text-slate-600">
                           {formatDateTime(submission.createdAt ?? submission.created_at)}
@@ -236,7 +271,7 @@ function SubmissionsPage() {
                               type="button"
                               variant="ghost"
                               className="h-10 rounded-xl px-3 text-base font-semibold"
-                              onClick={() => setSelectedFile({ name, url: fileUrl })}
+                              onClick={() => setSelectedFile({ name: displayName, url: fileUrl })}
                             >
                               <Eye className="h-4 w-4" />
                               View
