@@ -1,11 +1,9 @@
 const SUPABASE_STORAGE_BUCKET = "registration-photos";
-const DEPLOYED_API_BASE_URL = "https://form-backend-sepia.vercel.app";
-
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export const API_BASE_URL = (
   configuredApiBaseUrl ||
-  (import.meta.env.DEV ? "http://localhost:4000" : DEPLOYED_API_BASE_URL)
+  (import.meta.env.DEV ? "http://localhost:4000" : "")
 ).replace(/\/$/, "");
 
 export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
