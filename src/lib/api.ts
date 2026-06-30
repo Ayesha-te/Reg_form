@@ -1,8 +1,8 @@
 const SUPABASE_STORAGE_BUCKET = "registration-photos";
-const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const deployedApiBaseUrl = "https://form-psi-ten-23.vercel.app";
 
 export const API_BASE_URL = (
-  configuredApiBaseUrl ||
+  deployedApiBaseUrl ||
   (import.meta.env.DEV ? "http://localhost:4000" : "")
 ).replace(/\/$/, "");
 
