@@ -56,10 +56,7 @@ const schema = z
   .object({
     firstName: z.string().trim().min(1, "First name is required").max(80),
     lastName: z.string().trim().min(1, "Last name is required").max(80),
-    mobile: z
-      .string()
-      .trim()
-      .regex(phoneRegex, "Use 10 digits or UAE format +9715XXXXXXXX"),
+    mobile: z.string().trim().regex(phoneRegex, "Use 10 digits or UAE format +9715XXXXXXXX"),
     email: z.string().trim().email("Enter a valid email address").max(255),
     whatsappNumber: z
       .string()
@@ -76,7 +73,7 @@ const schema = z
     preferredSleeves: z.enum(["Full Sleeves", "Half Sleeves"], {
       message: "Select preferred sleeves",
     }),
-    currentClub: z.string().trim().min(1, "Current club/team is required").max(120),
+    currentClub: z.string().trim().max(120),
     availability: z.enum(["Available all matches", "Missing few matches"], {
       message: "Select availability",
     }),
@@ -127,11 +124,15 @@ const initial: FormState = {
   feeAgreement: false,
 };
 
-const TOTAL_STEPS = 14;
+const TOTAL_STEPS = 13;
 
 type FieldStatus = "neutral" | "valid" | "error";
 
-function fieldStatus(isTouched: boolean, error: string | undefined, hasValue: boolean): FieldStatus {
+function fieldStatus(
+  isTouched: boolean,
+  error: string | undefined,
+  hasValue: boolean,
+): FieldStatus {
   if (!isTouched) return "neutral";
   if (error) return "error";
   return hasValue ? "valid" : "neutral";
@@ -159,7 +160,6 @@ export function RegistrationForm() {
       values.jerseyNumber,
       values.jerseySize,
       values.preferredSleeves,
-      values.currentClub,
       values.availability,
     ].filter(Boolean).length;
 
@@ -172,20 +172,24 @@ export function RegistrationForm() {
   const progressPercent = Math.round((completionCount / TOTAL_STEPS) * 100);
 
   const playerComplete =
-    Boolean(values.firstName && values.lastName && values.mobile && values.email && values.whatsappNumber) &&
+    Boolean(
+      values.firstName && values.lastName && values.mobile && values.email && values.whatsappNumber,
+    ) &&
     !errors.firstName &&
     !errors.lastName &&
     !errors.mobile &&
     !errors.email &&
     !errors.whatsappNumber;
   const jerseyComplete =
-    Boolean(values.jerseyName && values.jerseyNumber && values.jerseySize && values.preferredSleeves) &&
+    Boolean(
+      values.jerseyName && values.jerseyNumber && values.jerseySize && values.preferredSleeves,
+    ) &&
     !errors.jerseyName &&
     !errors.jerseyNumber &&
     !errors.jerseySize &&
     !errors.preferredSleeves;
   const availabilityComplete =
-    Boolean(values.currentClub && values.availability) &&
+    Boolean(values.availability) &&
     (values.availability === "Available all matches" || values.notAvailableOn.length > 0) &&
     !errors.currentClub &&
     !errors.availability &&
@@ -245,7 +249,8 @@ export function RegistrationForm() {
     setApiError(null);
 
     if (touched[key as string] || errors[key as string]) setFieldError(key, nextValues);
-    if (key === "availability" || key === "notAvailableOn") setFieldError("notAvailableOn", nextValues);
+    if (key === "availability" || key === "notAvailableOn")
+      setFieldError("notAvailableOn", nextValues);
   }
 
   function toggleNotAvailableOn(matchName: string) {
@@ -334,9 +339,7 @@ export function RegistrationForm() {
     formData.append("preferredSleeves", parsed.data.preferredSleeves);
     formData.append("currentClub", parsed.data.currentClub);
     formData.append("availability", parsed.data.availability);
-    parsed.data.notAvailableOn.forEach((matchName) =>
-      formData.append("notAvailableOn", matchName),
-    );
+    parsed.data.notAvailableOn.forEach((matchName) => formData.append("notAvailableOn", matchName));
     formData.append("feeAgreement", String(parsed.data.feeAgreement));
     formData.append("photo", file);
 
@@ -372,9 +375,7 @@ export function RegistrationForm() {
     } catch (error) {
       console.error(error);
       const message =
-        error instanceof Error
-          ? error.message
-          : `Could not reach the API at ${API_BASE_URL}`;
+        error instanceof Error ? error.message : `Could not reach the API at ${API_BASE_URL}`;
       setApiError(message);
       toast.error(message);
     } finally {
@@ -400,7 +401,7 @@ export function RegistrationForm() {
               Player registration
             </div>
             <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
-              Indoor Cricket Rising League 3
+              Indoor Cricket Rising League 3.0
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Complete all required player, jersey, availability, and payment agreement details.
@@ -413,7 +414,9 @@ export function RegistrationForm() {
               {progressPercent === 100 ? (
                 <CheckCircle2 className="h-4 w-4 text-success" />
               ) : (
-                <span className="font-display tabular-nums text-foreground">{progressPercent}%</span>
+                <span className="font-display tabular-nums text-foreground">
+                  {progressPercent}%
+                </span>
               )}
             </div>
             <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-muted">
@@ -444,10 +447,18 @@ export function RegistrationForm() {
             description="Player identity and contact information."
             complete={playerComplete}
           >
-            <Field label="First Name" error={touched.firstName ? errors.firstName : undefined} required>
+            <Field
+              label="First Name"
+              error={touched.firstName ? errors.firstName : undefined}
+              required
+            >
               <StatusInput
                 icon={UserRound}
-                status={fieldStatus(Boolean(touched.firstName), errors.firstName, Boolean(values.firstName))}
+                status={fieldStatus(
+                  Boolean(touched.firstName),
+                  errors.firstName,
+                  Boolean(values.firstName),
+                )}
                 value={values.firstName}
                 onChange={(event) => update("firstName", event.target.value)}
                 onBlur={() => markTouched("firstName")}
@@ -456,10 +467,18 @@ export function RegistrationForm() {
               />
             </Field>
 
-            <Field label="Last Name" error={touched.lastName ? errors.lastName : undefined} required>
+            <Field
+              label="Last Name"
+              error={touched.lastName ? errors.lastName : undefined}
+              required
+            >
               <StatusInput
                 icon={UserRound}
-                status={fieldStatus(Boolean(touched.lastName), errors.lastName, Boolean(values.lastName))}
+                status={fieldStatus(
+                  Boolean(touched.lastName),
+                  errors.lastName,
+                  Boolean(values.lastName),
+                )}
                 value={values.lastName}
                 onChange={(event) => update("lastName", event.target.value)}
                 onBlur={() => markTouched("lastName")}
@@ -530,10 +549,18 @@ export function RegistrationForm() {
             description="Name, number, size, and sleeve preference."
             complete={jerseyComplete}
           >
-            <Field label="Name of Jersey" error={touched.jerseyName ? errors.jerseyName : undefined} required>
+            <Field
+              label="Name of Jersey"
+              error={touched.jerseyName ? errors.jerseyName : undefined}
+              required
+            >
               <StatusInput
                 icon={Shirt}
-                status={fieldStatus(Boolean(touched.jerseyName), errors.jerseyName, Boolean(values.jerseyName))}
+                status={fieldStatus(
+                  Boolean(touched.jerseyName),
+                  errors.jerseyName,
+                  Boolean(values.jerseyName),
+                )}
                 value={values.jerseyName}
                 onChange={(event) => update("jerseyName", event.target.value)}
                 onBlur={() => markTouched("jerseyName")}
@@ -561,7 +588,11 @@ export function RegistrationForm() {
               />
             </Field>
 
-            <Field label="Jersey Size" error={touched.jerseySize ? errors.jerseySize : undefined} required>
+            <Field
+              label="Jersey Size"
+              error={touched.jerseySize ? errors.jerseySize : undefined}
+              required
+            >
               <Select
                 value={values.jerseySize}
                 onValueChange={(value) => {
@@ -613,25 +644,33 @@ export function RegistrationForm() {
             total={4}
             icon={UsersRound}
             title="Availability"
-            description="Current team and match availability."
+            description="Current club/team (optional) and match availability."
             complete={availabilityComplete}
           >
             <Field
-              label="Your current club / team?"
+              label="Current Club/Team"
+              hint="Optional"
               error={touched.currentClub ? errors.currentClub : undefined}
-              required
             >
               <StatusInput
                 icon={UsersRound}
-                status={fieldStatus(Boolean(touched.currentClub), errors.currentClub, Boolean(values.currentClub))}
+                status={fieldStatus(
+                  Boolean(touched.currentClub),
+                  errors.currentClub,
+                  Boolean(values.currentClub),
+                )}
                 value={values.currentClub}
                 onChange={(event) => update("currentClub", event.target.value)}
                 onBlur={() => markTouched("currentClub")}
-                placeholder="Club or team name"
+                placeholder="Club or team name (optional)"
               />
             </Field>
 
-            <Field label="Availability" error={touched.availability ? errors.availability : undefined} required>
+            <Field
+              label="Availability"
+              error={touched.availability ? errors.availability : undefined}
+              required
+            >
               <Select
                 value={values.availability}
                 onValueChange={(value) => {
@@ -672,7 +711,10 @@ export function RegistrationForm() {
                             : "border-input bg-background/80 hover:-translate-y-0.5 hover:bg-accent",
                         )}
                       >
-                        <Checkbox checked={checked} onCheckedChange={() => toggleNotAvailableOn(option)} />
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={() => toggleNotAvailableOn(option)}
+                        />
                         <span className="font-medium">{option}</span>
                       </label>
                     );
@@ -778,7 +820,7 @@ export function RegistrationForm() {
                   }}
                 />
                 <span className="leading-6">
-                  I agree to pay registration fees of AED 100 and match fees of AED 20 per match.
+                  I agree to pay registration fees of AED 60 and match fees of AED 35/- per match.
                 </span>
               </label>
             </Field>

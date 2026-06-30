@@ -13,6 +13,30 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+type RegistrationRow =
+  | {
+      _id?: { toString(): string };
+      first_name?: string;
+      last_name?: string;
+      full_name?: string;
+      email?: string;
+      mobile?: string;
+      whatsapp_number?: string;
+      jersey_name?: string;
+      jersey_number?: string;
+      jersey_size?: string;
+      preferred_sleeves?: string;
+      current_club?: string;
+      availability?: string;
+      not_available_on?: string[];
+      fee_agreement?: boolean;
+      photo_path?: string;
+      original_photo_name?: string;
+      created_at?: string;
+    }
+  | null
+  | undefined;
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 let mongoClient: MongoClient | undefined;
 
@@ -189,25 +213,37 @@ function normalizeRegistration(formData: FormData) {
   };
 }
 
-async function validateRegistration(registration: ReturnType<typeof normalizeRegistration>, photo: FormDataEntryValue | null) {
+async function validateRegistration(
+  registration: ReturnType<typeof normalizeRegistration>,
+  photo: FormDataEntryValue | null,
+) {
   const errors: Record<string, string> = {};
   const phoneRegex = /^(\+9715\d{8}|\d{10})$/;
 
   if (!registration.firstName) errors.firstName = "First name is required.";
   if (!registration.lastName) errors.lastName = "Last name is required.";
-  if (!phoneRegex.test(registration.mobile)) errors.mobile = "Use 10 digits or UAE format +9715XXXXXXXX.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registration.email)) errors.email = "Enter a valid email address.";
-  if (!phoneRegex.test(registration.whatsappNumber)) errors.whatsappNumber = "Use 10 digits or UAE format +9715XXXXXXXX.";
+  if (!phoneRegex.test(registration.mobile))
+    errors.mobile = "Use 10 digits or UAE format +9715XXXXXXXX.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registration.email))
+    errors.email = "Enter a valid email address.";
+  if (!phoneRegex.test(registration.whatsappNumber))
+    errors.whatsappNumber = "Use 10 digits or UAE format +9715XXXXXXXX.";
   if (!registration.jerseyName) errors.jerseyName = "Name of jersey is required.";
-  if (!/^\d{1,3}$/.test(registration.jerseyNumber)) errors.jerseyNumber = "Jersey number must be whole numbers only.";
+  if (!/^\d{1,3}$/.test(registration.jerseyNumber))
+    errors.jerseyNumber = "Jersey number must be whole numbers only.";
   if (!JERSEY_SIZES.has(registration.jerseySize)) errors.jerseySize = "Select a jersey size.";
-  if (!PREFERRED_SLEEVES.has(registration.preferredSleeves)) errors.preferredSleeves = "Select preferred sleeves.";
-  if (!registration.currentClub) errors.currentClub = "Current club/team is required.";
-  if (!AVAILABILITY_OPTIONS.has(registration.availability)) errors.availability = "Select availability.";
-  if (registration.availability === "Missing few matches" && registration.notAvailableOn.length === 0) {
+  if (!PREFERRED_SLEEVES.has(registration.preferredSleeves))
+    errors.preferredSleeves = "Select preferred sleeves.";
+  if (!AVAILABILITY_OPTIONS.has(registration.availability))
+    errors.availability = "Select availability.";
+  if (
+    registration.availability === "Missing few matches" &&
+    registration.notAvailableOn.length === 0
+  ) {
     errors.notAvailableOn = "Select at least one match.";
   }
-  if (!registration.feeAgreement) errors.feeAgreement = "You must agree to the registration and match fees.";
+  if (!registration.feeAgreement)
+    errors.feeAgreement = "You must agree to the registration and match fees.";
 
   if (!(photo instanceof File) || photo.size === 0) {
     errors.photo = "Upload a JPG or PNG photo under 2 MB.";
@@ -223,7 +259,7 @@ async function validateRegistration(registration: ReturnType<typeof normalizeReg
   return errors;
 }
 
-function formatRegistration(row: any) {
+function formatRegistration(row: RegistrationRow) {
   return {
     id: row?._id ? String(row._id) : "",
     firstName: row?.first_name,
@@ -247,7 +283,8 @@ function formatRegistration(row: any) {
 }
 
 function detectImageExtension(buffer: Buffer) {
-  if (buffer.length >= 4 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return ".jpg";
+  if (buffer.length >= 4 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff)
+    return ".jpg";
   if (
     buffer.length >= 8 &&
     buffer[0] === 0x89 &&

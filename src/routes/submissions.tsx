@@ -1,12 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  CalendarDays,
-  Eye,
-  FileImage,
-  Loader2,
-  RefreshCcw,
-  TableProperties,
-} from "lucide-react";
+import { CalendarDays, Eye, FileImage, Loader2, RefreshCcw, TableProperties } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -47,7 +40,7 @@ const columns = [
   "Jersey Size",
   "Jersey Number",
   "Preferred Sleeves",
-  "Current Club / Team",
+  "Current Club/Team",
   "Availability",
   "Not Available On",
   "Fee Agreement",
@@ -76,14 +69,12 @@ function SubmissionsPage() {
         throw new Error("Could not load registration submissions.");
       }
 
-      const rows = Array.isArray(payload) ? payload : payload.registrations ?? payload.data ?? [];
+      const rows = Array.isArray(payload) ? payload : (payload.registrations ?? payload.data ?? []);
       setSubmissions(rows);
     } catch (loadError) {
       console.error(loadError);
       setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Could not load registration submissions.",
+        loadError instanceof Error ? loadError.message : "Could not load registration submissions.",
       );
     } finally {
       setLoading(false);
@@ -104,13 +95,9 @@ function SubmissionsPage() {
       <header className="border-b border-border bg-card/95 px-4 py-3 shadow-sm sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <img
-              src={logoUrl}
-              alt="Event logo"
-              className="h-16 w-24 shrink-0 object-contain"
-            />
+            <img src={logoUrl} alt="Event logo" className="h-16 w-24 shrink-0 object-contain" />
             <span className="text-2xl font-black tracking-tight text-foreground">
-              Indoor Cricket Rising League 3
+              Indoor Cricket Rising League 3.0
             </span>
           </Link>
 
@@ -152,7 +139,11 @@ function SubmissionsPage() {
               onClick={() => void loadSubmissions()}
               disabled={loading}
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCcw className="h-4 w-4" />
+              )}
               Refresh
             </Button>
           </div>
@@ -175,10 +166,7 @@ function SubmissionsPage() {
               <thead>
                 <tr className="border-b border-border">
                   {columns.map((column) => (
-                    <th
-                      key={column}
-                      className="px-6 py-5 text-base font-bold text-slate-700"
-                    >
+                    <th key={column} className="px-6 py-5 text-base font-bold text-slate-700">
                       {column}
                     </th>
                   ))}
@@ -196,7 +184,10 @@ function SubmissionsPage() {
                   </tr>
                 ) : submissions.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length} className="px-6 py-16 text-center text-muted-foreground">
+                    <td
+                      colSpan={columns.length}
+                      className="px-6 py-16 text-center text-muted-foreground"
+                    >
                       No submissions found.
                     </td>
                   </tr>
@@ -205,14 +196,12 @@ function SubmissionsPage() {
                     const firstName = submission.firstName ?? submission.first_name ?? "";
                     const lastName = submission.lastName ?? submission.last_name ?? "";
                     const fallbackName = submission.fullName ?? submission.full_name ?? "Unknown";
-                    const displayName = [firstName, lastName].filter(Boolean).join(" ") || fallbackName;
+                    const displayName =
+                      [firstName, lastName].filter(Boolean).join(" ") || fallbackName;
                     const fileUrl = getFileUrl(submission);
 
                     return (
-                      <tr
-                        key={submission.id}
-                        className="border-b border-border last:border-b-0"
-                      >
+                      <tr key={submission.id} className="border-b border-border last:border-b-0">
                         <td className="px-6 py-6 align-middle text-lg font-bold text-foreground">
                           {firstName || fallbackName}
                         </td>
@@ -248,19 +237,26 @@ function SubmissionsPage() {
                         </td>
                         <td className="px-6 py-6 align-middle">
                           <div className="flex max-w-64 flex-wrap gap-1.5">
-                            {(submission.notAvailableOn ?? submission.not_available_on ?? []).length > 0 ? (
-                              (submission.notAvailableOn ?? submission.not_available_on ?? []).map((matchName) => (
-                                <Badge key={matchName} variant="secondary" className="rounded-full">
-                                  {matchName}
-                                </Badge>
-                              ))
+                            {(submission.notAvailableOn ?? submission.not_available_on ?? [])
+                              .length > 0 ? (
+                              (submission.notAvailableOn ?? submission.not_available_on ?? []).map(
+                                (matchName) => (
+                                  <Badge
+                                    key={matchName}
+                                    variant="secondary"
+                                    className="rounded-full"
+                                  >
+                                    {matchName}
+                                  </Badge>
+                                ),
+                              )
                             ) : (
                               <span className="text-lg text-slate-600">-</span>
                             )}
                           </div>
                         </td>
                         <td className="px-6 py-6 align-middle text-lg text-slate-600">
-                          {submission.feeAgreement ?? submission.fee_agreement ? "Accepted" : "-"}
+                          {(submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "-"}
                         </td>
                         <td className="px-6 py-6 align-middle text-lg text-slate-600">
                           {formatDateTime(submission.createdAt ?? submission.created_at)}

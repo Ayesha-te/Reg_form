@@ -23,14 +23,10 @@ function Index() {
       <div className="relative mx-auto w-full max-w-7xl py-0 sm:py-4 lg:py-8">
         <header className="mb-6 flex items-center justify-between rounded-2xl border border-white/70 bg-card/90 px-5 py-1 shadow-sm backdrop-blur">
           <div className="flex items-center gap-3">
-            <img
-              src={logoUrl}
-              alt="Event logo"
-              className="h-16 w-24 shrink-0 object-contain"
-            />
+            <img src={logoUrl} alt="Event logo" className="h-16 w-24 shrink-0 object-contain" />
             <div>
               <p className="text-lg font-black tracking-tight text-foreground">
-                Indoor Cricket Rising League 3
+                Indoor Cricket Rising League 3.0
               </p>
               <p className="text-xs font-medium text-muted-foreground">Player registration</p>
             </div>
