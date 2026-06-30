@@ -30,7 +30,7 @@ function Index() {
             />
             <div>
               <p className="text-lg font-black tracking-tight text-foreground">
-                Indoor Champions League 8.0
+                Indoor Cricket Rising League 3
               </p>
               <p className="text-xs font-medium text-muted-foreground">Player registration</p>
             </div>

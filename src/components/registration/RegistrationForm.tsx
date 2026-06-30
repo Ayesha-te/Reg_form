@@ -400,7 +400,7 @@ export function RegistrationForm() {
               Player registration
             </div>
             <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
-              Indoor Champions League 8.0
+              Indoor Cricket Rising League 3
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Complete all required player, jersey, availability, and payment agreement details.

@@ -110,7 +110,7 @@ function SubmissionsPage() {
               className="h-16 w-24 shrink-0 object-contain"
             />
             <span className="text-2xl font-black tracking-tight text-foreground">
-              Indoor Champions League 8.0
+              Indoor Cricket Rising League 3
             </span>
           </Link>
 
