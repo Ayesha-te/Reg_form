@@ -827,18 +827,44 @@ export function RegistrationForm() {
           </Section>
         </div>
 
-        <Button
-          type="submit"
-          disabled={submitting}
-          className="animate-pulse-glow mt-2 h-12 w-full rounded-xl text-base font-semibold shadow-[var(--shadow-glow)]"
-        >
-          {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {submitting ? "Submitting" : "Submit registration"}
-        </Button>
+        <div className="mt-2 flex justify-center">
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="animate-pulse-glow h-11 min-w-56 rounded-xl px-8 text-sm font-semibold shadow-[var(--shadow-glow)]"
+          >
+            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {submitting ? "Submitting" : "Submit registration"}
+          </Button>
+        </div>
 
         <div className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5 text-success" />
           <span>Your details are encrypted and only used to verify your registration.</span>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-border/70 bg-background/70 px-5 py-4 text-center">
+          <p className="text-sm font-semibold text-foreground">For more information, contact:</p>
+          <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+            <p>
+              Hussein Sancha{" "}
+              <a className="font-medium text-foreground hover:text-primary" href="tel:0508759122">
+                050-8759122
+              </a>
+            </p>
+            <p>
+              Qasim Ali{" "}
+              <a className="font-medium text-foreground hover:text-primary" href="tel:0507862132">
+                050-7862132
+              </a>
+            </p>
+            <p>
+              Quaid Joher{" "}
+              <a className="font-medium text-foreground hover:text-primary" href="tel:0556086529">
+                055-6086529
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </form>
