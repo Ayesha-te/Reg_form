@@ -1,5 +1,5 @@
 const SUPABASE_STORAGE_BUCKET = "registration-photos";
-const deployedApiBaseUrl = "https://form-psi-ten-23.vercel.app";
+const deployedApiBaseUrl = "https://form-2z8h.onrender.com";
 
 export const API_BASE_URL = (
   deployedApiBaseUrl ||
