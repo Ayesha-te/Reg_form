@@ -1,5 +1,5 @@
 const SUPABASE_STORAGE_BUCKET = "registration-photos";
-const deployedApiBaseUrl = "http://api.stride-events.net";
+const deployedApiBaseUrl = "https://api.stride-events.net";
 
 export const API_BASE_URL = (
   deployedApiBaseUrl ||
