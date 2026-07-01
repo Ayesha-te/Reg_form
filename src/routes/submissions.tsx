@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, Eye, FileImage, Loader2, RefreshCcw, TableProperties } from "lucide-react";
+import {
+  CalendarDays,
+  Download,
+  Eye,
+  FileImage,
+  Loader2,
+  RefreshCcw,
+  TableProperties,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -47,6 +55,8 @@ const columns = [
   "Created At",
   "File",
 ];
+
+const excelColumns = [...columns, "File URL"];
 
 function SubmissionsPage() {
   const [submissions, setSubmissions] = useState<RegistrationSubmission[]>([]);
@@ -146,6 +156,15 @@ function SubmissionsPage() {
               )}
               Refresh
             </Button>
+            <Button
+              type="button"
+              className="h-11 rounded-xl"
+              onClick={() => exportSubmissionsToExcel(submissions)}
+              disabled={loading || submissions.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Export Excel
+            </Button>
           </div>
         </div>
 
@@ -162,11 +181,14 @@ function SubmissionsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-[1900px] w-full border-collapse text-left">
+            <table className="w-full min-w-[2100px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-border">
                   {columns.map((column) => (
-                    <th key={column} className="px-6 py-5 text-base font-bold text-slate-700">
+                    <th
+                      key={column}
+                      className="whitespace-nowrap px-4 py-4 text-xs font-bold uppercase tracking-wide text-slate-700"
+                    >
                       {column}
                     </th>
                   ))}
@@ -202,41 +224,41 @@ function SubmissionsPage() {
 
                     return (
                       <tr key={submission.id} className="border-b border-border last:border-b-0">
-                        <td className="px-6 py-6 align-middle text-lg font-bold text-foreground">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle font-bold text-foreground">
                           {firstName || fallbackName}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg font-bold text-foreground">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle font-bold text-foreground">
                           {lastName || "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.email}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.mobile}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.whatsappNumber ?? submission.whatsapp_number ?? "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.jerseyName ?? submission.jersey_name ?? "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.jerseySize ?? submission.jersey_size ?? "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.jerseyNumber ?? submission.jersey_number ?? "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.preferredSleeves ?? submission.preferred_sleeves ?? "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.currentClub ?? submission.current_club ?? "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {submission.availability ?? "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle">
-                          <div className="flex max-w-64 flex-wrap gap-1.5">
+                        <td className="px-4 py-4 align-middle">
+                          <div className="flex max-w-72 flex-wrap gap-1.5">
                             {(submission.notAvailableOn ?? submission.not_available_on ?? [])
                               .length > 0 ? (
                               (submission.notAvailableOn ?? submission.not_available_on ?? []).map(
@@ -251,22 +273,22 @@ function SubmissionsPage() {
                                 ),
                               )
                             ) : (
-                              <span className="text-lg text-slate-600">-</span>
+                              <span className="text-slate-600">-</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {(submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "-"}
                         </td>
-                        <td className="px-6 py-6 align-middle text-lg text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {formatDateTime(submission.createdAt ?? submission.created_at)}
                         </td>
-                        <td className="px-6 py-6 align-middle">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle">
                           {fileUrl ? (
                             <Button
                               type="button"
                               variant="ghost"
-                              className="h-10 rounded-xl px-3 text-base font-semibold"
+                              className="h-9 rounded-xl px-3 text-sm font-semibold"
                               onClick={() => setSelectedFile({ name: displayName, url: fileUrl })}
                             >
                               <Eye className="h-4 w-4" />
@@ -318,6 +340,48 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-lg font-black text-foreground">{value}</p>
     </div>
   );
+}
+
+function exportSubmissionsToExcel(submissions: RegistrationSubmission[]) {
+  const rows = submissions.map((submission) => {
+    const fileUrl = getFileUrl(submission) ?? "";
+
+    return [
+      submission.firstName ?? submission.first_name ?? submission.fullName ?? submission.full_name ?? "",
+      submission.lastName ?? submission.last_name ?? "",
+      submission.email,
+      submission.mobile,
+      submission.whatsappNumber ?? submission.whatsapp_number ?? "",
+      submission.jerseyName ?? submission.jersey_name ?? "",
+      submission.jerseySize ?? submission.jersey_size ?? "",
+      submission.jerseyNumber ?? submission.jersey_number ?? "",
+      submission.preferredSleeves ?? submission.preferred_sleeves ?? "",
+      submission.currentClub ?? submission.current_club ?? "",
+      submission.availability ?? "",
+      (submission.notAvailableOn ?? submission.not_available_on ?? []).join(", "),
+      (submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "",
+      formatDateTime(submission.createdAt ?? submission.created_at),
+      fileUrl ? "View" : "",
+      fileUrl,
+    ];
+  });
+
+  const csv = [excelColumns, ...rows].map((row) => row.map(formatCsvCell).join(",")).join("\r\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `registration-submissions-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function formatCsvCell(value: string | number | boolean | null | undefined) {
+  const cell = String(value ?? "");
+  const excelSafeCell = /^[=+\-@]/.test(cell) ? `'${cell}` : cell;
+  return `"${excelSafeCell.replace(/"/g, '""')}"`;
 }
 
 function getFileUrl(submission: RegistrationSubmission) {
