@@ -6,13 +6,16 @@ import {
   FileImage,
   Loader2,
   RefreshCcw,
+  Search,
   TableProperties,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +63,7 @@ const excelColumns = [...columns, "File URL"];
 
 function SubmissionsPage() {
   const [submissions, setSubmissions] = useState<RegistrationSubmission[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<{
@@ -99,6 +103,15 @@ function SubmissionsPage() {
     () => submissions.filter((submission) => getFileUrl(submission)).length,
     [submissions],
   );
+  const filteredSubmissions = useMemo(() => {
+    const normalizedQuery = normalizeSearchValue(searchQuery);
+    if (!normalizedQuery) return submissions;
+
+    return submissions.filter((submission) =>
+      getSubmissionSearchText(submission).includes(normalizedQuery),
+    );
+  }, [searchQuery, submissions]);
+  const hasSearchQuery = searchQuery.trim().length > 0;
 
   return (
     <main className="min-h-screen bg-background">
@@ -159,8 +172,8 @@ function SubmissionsPage() {
             <Button
               type="button"
               className="h-11 rounded-xl"
-              onClick={() => exportSubmissionsToExcel(submissions)}
-              disabled={loading || submissions.length === 0}
+              onClick={() => exportSubmissionsToExcel(filteredSubmissions)}
+              disabled={loading || filteredSubmissions.length === 0}
             >
               <Download className="h-4 w-4" />
               Export Excel
@@ -175,9 +188,39 @@ function SubmissionsPage() {
         )}
 
         <div className="mt-10 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)]">
-          <div className="flex items-center gap-3 border-b border-border px-6 py-4">
-            <TableProperties className="h-5 w-5 text-primary" />
-            <p className="font-semibold text-foreground">Submitted entries</p>
+          <div className="flex flex-col gap-4 border-b border-border px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3">
+              <TableProperties className="h-5 w-5 text-primary" />
+              <p className="font-semibold text-foreground">Submitted entries</p>
+              {hasSearchQuery && (
+                <span className="text-sm text-muted-foreground">
+                  {filteredSubmissions.length} match{filteredSubmissions.length === 1 ? "" : "es"}
+                </span>
+              )}
+            </div>
+
+            <div className="relative w-full lg:max-w-sm">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search submissions"
+                className="h-11 rounded-xl bg-background pl-10 pr-10"
+              />
+              {hasSearchQuery && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 rounded-lg"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -213,8 +256,17 @@ function SubmissionsPage() {
                       No submissions found.
                     </td>
                   </tr>
+                ) : filteredSubmissions.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className="px-6 py-16 text-center text-muted-foreground"
+                    >
+                      No submissions match your search.
+                    </td>
+                  </tr>
                 ) : (
-                  submissions.map((submission) => {
+                  filteredSubmissions.map((submission) => {
                     const firstName = submission.firstName ?? submission.first_name ?? "";
                     const lastName = submission.lastName ?? submission.last_name ?? "";
                     const fallbackName = submission.fullName ?? submission.full_name ?? "Unknown";
@@ -340,6 +392,41 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-lg font-black text-foreground">{value}</p>
     </div>
   );
+}
+
+function getSubmissionSearchText(submission: RegistrationSubmission) {
+  const values = [
+    submission.firstName,
+    submission.first_name,
+    submission.lastName,
+    submission.last_name,
+    submission.fullName,
+    submission.full_name,
+    submission.email,
+    submission.mobile,
+    submission.whatsappNumber,
+    submission.whatsapp_number,
+    submission.jerseyName,
+    submission.jersey_name,
+    submission.jerseySize,
+    submission.jersey_size,
+    submission.jerseyNumber,
+    submission.jersey_number,
+    submission.preferredSleeves,
+    submission.preferred_sleeves,
+    submission.currentClub,
+    submission.current_club,
+    submission.availability,
+    ...(submission.notAvailableOn ?? submission.not_available_on ?? []),
+    (submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "",
+    formatDateTime(submission.createdAt ?? submission.created_at),
+  ];
+
+  return normalizeSearchValue(values.filter(Boolean).join(" "));
+}
+
+function normalizeSearchValue(value: string) {
+  return value.trim().toLowerCase();
 }
 
 function exportSubmissionsToExcel(submissions: RegistrationSubmission[]) {
