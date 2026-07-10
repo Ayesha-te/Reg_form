@@ -12,6 +12,7 @@ export const REGISTRATION_PHOTOS_PUBLIC_BASE_URL = SUPABASE_URL
   ? `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}`
   : "";
 
+  
 export type ApiErrorResponse = {
   ok: false;
   message?: string;
