@@ -6,10 +6,10 @@ import { RegistrationForm } from "@/components/registration/RegistrationForm";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Registration" },
+      { title: "Registration Closed | Indoor Cricket Rising League 3.0" },
       {
         name: "description",
-        content: "Fill out the registration form to submit your details.",
+        content: "Registration for Indoor Cricket Rising League 3.0 is now closed.",
       },
     ],
   }),
@@ -18,17 +18,22 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[var(--gradient-surface)] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[linear-gradient(135deg,oklch(0.58_0.21_264_/_18%),oklch(0.76_0.16_198_/_16%),transparent)]" />
-      <div className="relative mx-auto w-full max-w-7xl py-0 sm:py-4 lg:py-8">
-        <header className="mb-6 flex items-center justify-between rounded-2xl border border-white/70 bg-card/90 px-5 py-1 shadow-sm backdrop-blur">
-          <div className="flex items-center gap-3">
-            <img src={logoUrl} alt="Event logo" className="h-16 w-24 shrink-0 object-contain" />
-            <div>
-              <p className="text-lg font-black tracking-tight text-foreground">
+    <main className="min-h-screen overflow-x-hidden bg-[oklch(0.95_0.027_213)] px-4 py-5 font-display text-slate-500 sm:px-6 lg:px-10">
+      <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[1500px] flex-col">
+        <header className="mb-7 flex min-h-20 w-full max-w-full items-center rounded-[2rem] border border-white/80 bg-white/90 px-4 py-3 shadow-[0_24px_70px_-54px_oklch(0.42_0.035_250_/_0.75)] sm:px-8 sm:py-4">
+          <div className="flex min-w-0 items-center gap-4 sm:gap-6">
+            <img
+              src={logoUrl}
+              alt="Indoor Cricket Rising League logo"
+              className="h-14 w-20 shrink-0 object-contain sm:h-20 sm:w-32"
+            />
+            <div className="min-w-0">
+              <p className="text-sm font-extrabold leading-tight tracking-normal text-slate-600 sm:text-2xl lg:text-[1.7rem]">
                 Indoor Cricket Rising League 3.0
               </p>
-              <p className="text-xs font-medium text-muted-foreground">Player registration</p>
+              <p className="mt-0.5 text-sm font-medium text-slate-400 sm:text-base">
+                Player registration
+              </p>
             </div>
           </div>
         </header>
