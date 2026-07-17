@@ -3,6 +3,7 @@ import {
   CalendarDays,
   Download,
   Eye,
+  FileArchive,
   FileImage,
   Loader2,
   RefreshCcw,
@@ -59,12 +60,13 @@ const columns = [
   "File",
 ];
 
-const excelColumns = [...columns, "File URL"];
+const excelColumns = [...columns, "Photo Filename Key", "File URL"];
 
 function SubmissionsPage() {
   const [submissions, setSubmissions] = useState<RegistrationSubmission[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [downloadingPhotos, setDownloadingPhotos] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<{
     name: string;
@@ -99,6 +101,24 @@ function SubmissionsPage() {
     void loadSubmissions();
   }, []);
 
+  async function handleDownloadPhotos() {
+    setDownloadingPhotos(true);
+    setError(null);
+
+    try {
+      await downloadSubmissionPhotos(filteredSubmissions);
+    } catch (downloadError) {
+      console.error(downloadError);
+      setError(
+        downloadError instanceof Error
+          ? downloadError.message
+          : "Could not download the submitted photos.",
+      );
+    } finally {
+      setDownloadingPhotos(false);
+    }
+  }
+
   const totalFiles = useMemo(
     () => submissions.filter((submission) => getFileUrl(submission)).length,
     [submissions],
@@ -111,6 +131,10 @@ function SubmissionsPage() {
       getSubmissionSearchText(submission).includes(normalizedQuery),
     );
   }, [searchQuery, submissions]);
+  const filteredFiles = useMemo(
+    () => filteredSubmissions.filter((submission) => getFileUrl(submission)).length,
+    [filteredSubmissions],
+  );
   const hasSearchQuery = searchQuery.trim().length > 0;
 
   return (
@@ -168,6 +192,20 @@ function SubmissionsPage() {
                 <RefreshCcw className="h-4 w-4" />
               )}
               Refresh
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-xl"
+              onClick={() => void handleDownloadPhotos()}
+              disabled={loading || downloadingPhotos || filteredFiles === 0}
+            >
+              {downloadingPhotos ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileArchive className="h-4 w-4" />
+              )}
+              {downloadingPhotos ? "Preparing ZIP" : "Download Photos"}
             </Button>
             <Button
               type="button"
@@ -434,7 +472,11 @@ function exportSubmissionsToExcel(submissions: RegistrationSubmission[]) {
     const fileUrl = getFileUrl(submission) ?? "";
 
     return [
-      submission.firstName ?? submission.first_name ?? submission.fullName ?? submission.full_name ?? "",
+      submission.firstName ??
+        submission.first_name ??
+        submission.fullName ??
+        submission.full_name ??
+        "",
       submission.lastName ?? submission.last_name ?? "",
       submission.email,
       submission.mobile,
@@ -449,6 +491,7 @@ function exportSubmissionsToExcel(submissions: RegistrationSubmission[]) {
       (submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "",
       formatDateTime(submission.createdAt ?? submission.created_at),
       fileUrl ? "View" : "",
+      fileUrl ? getPhotoFileKey(submission) : "",
       fileUrl,
     ];
   });
@@ -459,6 +502,150 @@ function exportSubmissionsToExcel(submissions: RegistrationSubmission[]) {
   const link = document.createElement("a");
   link.href = url;
   link.download = `registration-submissions-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadSubmissionPhotos(submissions: RegistrationSubmission[]) {
+  const { default: JSZip } = await import("jszip");
+  const photoEntries = submissions
+    .map((submission, index) => ({
+      index,
+      submission,
+      url: getFileUrl(submission),
+    }))
+    .filter((entry): entry is typeof entry & { url: string } => Boolean(entry.url));
+
+  if (photoEntries.length === 0) {
+    throw new Error("There are no photos in the selected submissions.");
+  }
+
+  const zip = new JSZip();
+  const photoFolder = zip.folder("registration-photos");
+  if (!photoFolder) throw new Error("Could not prepare the photo ZIP.");
+
+  const manifestRows: Array<Array<string | number>> = [];
+  const failedRows: Array<Array<string | number>> = [];
+
+  for (let start = 0; start < photoEntries.length; start += 5) {
+    const batch = photoEntries.slice(start, start + 5);
+    await Promise.all(
+      batch.map(async ({ index, submission, url }) => {
+        const fileKey = getPhotoFileKey(submission);
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+          const photoBlob = await response.blob();
+          const fileName = `${fileKey}.${getImageExtension(photoBlob.type, url)}`;
+          photoFolder.file(fileName, photoBlob);
+          manifestRows.push([
+            index,
+            fileName,
+            fileKey,
+            getSubmissionName(submission),
+            submission.jerseyNumber ?? submission.jersey_number ?? "",
+            submission.email,
+            url,
+            "Downloaded",
+          ]);
+        } catch (error) {
+          failedRows.push([
+            index,
+            "",
+            fileKey,
+            getSubmissionName(submission),
+            submission.jerseyNumber ?? submission.jersey_number ?? "",
+            submission.email,
+            url,
+            error instanceof Error ? error.message : "Download failed",
+          ]);
+        }
+      }),
+    );
+  }
+
+  if (manifestRows.length === 0) {
+    throw new Error(
+      "None of the photos could be downloaded. Check that the public photo links are accessible.",
+    );
+  }
+
+  const manifestHeader = [
+    "Photo Filename",
+    "Photo Filename Key",
+    "Participant Name",
+    "Jersey Number",
+    "Email",
+    "File URL",
+    "Status",
+  ];
+  const allManifestRows = [...manifestRows, ...failedRows]
+    .sort((left, right) => Number(left[0]) - Number(right[0]))
+    .map((row) => row.slice(1));
+  const manifestCsv = [manifestHeader, ...allManifestRows]
+    .map((row) => row.map(formatCsvCell).join(","))
+    .join("\r\n");
+  zip.file("photo-manifest.csv", `\uFEFF${manifestCsv}`);
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  downloadBlob(zipBlob, `registration-photos-${new Date().toISOString().slice(0, 10)}.zip`);
+
+  if (failedRows.length > 0) {
+    throw new Error(
+      `${manifestRows.length} photos downloaded; ${failedRows.length} failed. See photo-manifest.csv in the ZIP.`,
+    );
+  }
+}
+
+function getPhotoFileKey(submission: RegistrationSubmission) {
+  const jerseyNumber = submission.jerseyNumber ?? submission.jersey_number ?? "no-jersey";
+  return [
+    `jersey-${sanitizeFilenamePart(String(jerseyNumber))}`,
+    sanitizeFilenamePart(getSubmissionName(submission)),
+    sanitizeFilenamePart(String(submission.id)),
+  ].join("_");
+}
+
+function getSubmissionName(submission: RegistrationSubmission) {
+  const firstName = submission.firstName ?? submission.first_name ?? "";
+  const lastName = submission.lastName ?? submission.last_name ?? "";
+  return (
+    [firstName, lastName].filter(Boolean).join(" ") ||
+    submission.fullName ||
+    submission.full_name ||
+    "Unknown"
+  );
+}
+
+function sanitizeFilenamePart(value: string) {
+  return (
+    value
+      .trim()
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/^-+|-+$/g, "") || "unknown"
+  );
+}
+
+function getImageExtension(contentType: string, url: string) {
+  const normalizedType = contentType.toLowerCase();
+  if (normalizedType.includes("png")) return "png";
+  if (normalizedType.includes("webp")) return "webp";
+  if (normalizedType.includes("gif")) return "gif";
+  if (normalizedType.includes("jpeg") || normalizedType.includes("jpg")) return "jpg";
+
+  const extensionMatch = url.match(/\.(png|webp|gif|jpe?g)(?:$|[?#])/i);
+  return extensionMatch?.[1]?.toLowerCase().replace("jpeg", "jpg") ?? "jpg";
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
