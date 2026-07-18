@@ -50,6 +50,9 @@ const MONGODB_DB = process.env.MONGODB_DB ?? "registrations_db";
 const JERSEY_SIZES = new Set(["Small", "Medium", "Large", "XL", "XXL", "3XL", "4XL"]);
 const PREFERRED_SLEEVES = new Set(["Full Sleeves", "Half Sleeves"]);
 const AVAILABILITY_OPTIONS = new Set(["Available all matches", "Missing few matches"]);
+const REGISTRATION_OPEN = false;
+const REGISTRATION_CLOSED_MESSAGE =
+  "Registration for ICRL 3.0 is closed and no longer accepting new submissions.";
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
@@ -106,6 +109,13 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 }
 
 async function handleRegistration(request: Request) {
+  if (!REGISTRATION_OPEN) {
+    return json(403, {
+      ok: false,
+      message: REGISTRATION_CLOSED_MESSAGE,
+    });
+  }
+
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.toLowerCase().startsWith("multipart/form-data")) {
     return json(415, {

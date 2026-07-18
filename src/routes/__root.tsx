@@ -78,10 +78,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Registration Form" },
-      { name: "description", content: "Sign up in just a few quick steps." },
-      { property: "og:title", content: "Registration Form" },
-      { property: "og:description", content: "Sign up in just a few quick steps." },
+      { title: "Registration Closed" },
+      {
+        name: "description",
+        content: "Registration for Indoor Cricket Rising League 3.0 is closed.",
+      },
+      { property: "og:title", content: "Registration Closed" },
+      {
+        property: "og:description",
+        content: "Registration for Indoor Cricket Rising League 3.0 is closed.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
