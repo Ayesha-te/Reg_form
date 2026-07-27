@@ -5,10 +5,12 @@ import logoUrl from "@/components/logo.png";
 import { RegistrationForm } from "@/components/registration/RegistrationForm";
 import bannerOneUrl from "@/assets/Black and Red Modern Podcast Sport LinkedIn Banner.png";
 import bannerTwoUrl from "@/assets/ChatGPT Image Jul 21, 2026, 08_10_21 PM.png";
+import bannerThreeUrl from "@/assets/Gemini_Generated_Image_v5wuawv5wuawv5wu.png";
 
 const banners = [
   { src: bannerOneUrl, alt: "Indoor Community League event banner" },
   { src: bannerTwoUrl, alt: "Indoor Community League promotional banner" },
+  { src: bannerThreeUrl, alt: "Indoor Community League sponsor banner" },
 ];
 
 export const Route = createFileRoute("/")({
