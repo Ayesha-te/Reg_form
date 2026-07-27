@@ -90,7 +90,7 @@ function BannerSlideshow() {
         if (!event.currentTarget.contains(event.relatedTarget)) setIsPaused(false);
       }}
     >
-      <div className="relative aspect-[1942/809] w-full overflow-hidden bg-[#100a06]">
+      <div className="relative h-[42vw] max-h-[424px] w-full overflow-hidden bg-[#100a06]">
         {banners.map((banner, index) => (
           <img
             key={banner.src}
@@ -125,8 +125,6 @@ function BannerSlideshow() {
 
 /*function RegistrationClosed() {
   const contacts = [
-    { name: "Hussein Sancha", phone: "050-8759122", href: "tel:0508759122" },
-    { name: "Qasim Ali", phone: "050-7862132", href: "tel:0507862132" },
     { name: "Quaid Joher", phone: "055-6086529", href: "tel:0556086529" },
   ];
 

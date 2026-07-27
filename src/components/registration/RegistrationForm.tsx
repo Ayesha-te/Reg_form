@@ -918,18 +918,6 @@ export function RegistrationForm() {
           <p className="text-sm font-semibold text-foreground">For more information, contact:</p>
           <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
             <p>
-              Hussein Sancha{" "}
-              <a className="font-medium text-foreground hover:text-primary" href="tel:0508759122">
-                050-8759122
-              </a>
-            </p>
-            <p>
-              Qasim Ali{" "}
-              <a className="font-medium text-foreground hover:text-primary" href="tel:0507862132">
-                050-7862132
-              </a>
-            </p>
-            <p>
               Quaid Joher{" "}
               <a className="font-medium text-foreground hover:text-primary" href="tel:0556086529">
                 055-6086529
