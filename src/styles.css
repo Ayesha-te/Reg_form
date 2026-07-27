@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Roboto+Slab:wght@700;800;900&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -62,41 +62,41 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Roboto Slab", Georgia, serif;
 }
 
 :root {
-  --radius: 0.85rem;
-  --background: oklch(0.975 0.015 255);
-  --foreground: oklch(0.18 0.035 263);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.035 263);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.035 263);
-  --primary: oklch(0.55 0.22 264);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --primary-glow: oklch(0.72 0.19 250);
-  --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  --radius: 0.55rem;
+  --background: oklch(0.955 0.027 85);
+  --foreground: oklch(0.19 0.025 65);
+  --card: oklch(0.985 0.018 82);
+  --card-foreground: oklch(0.19 0.025 65);
+  --popover: oklch(0.99 0.014 82);
+  --popover-foreground: oklch(0.19 0.025 65);
+  --primary: oklch(0.32 0.07 155);
+  --primary-foreground: oklch(0.97 0.025 88);
+  --primary-glow: oklch(0.67 0.1 78);
+  --gradient-primary: linear-gradient(110deg, var(--primary), oklch(0.39 0.085 153));
   --gradient-surface:
-    radial-gradient(circle at top left, oklch(0.84 0.1 250 / 35%), transparent 32rem),
-    radial-gradient(circle at bottom right, oklch(0.88 0.12 205 / 32%), transparent 34rem),
-    linear-gradient(135deg, oklch(0.995 0.004 250), oklch(0.94 0.026 255));
-  --shadow-elegant: 0 30px 90px -35px color-mix(in oklab, var(--primary) 45%, transparent);
-  --shadow-glow: 0 18px 40px -18px color-mix(in oklab, var(--primary) 60%, transparent);
-  --shadow-soft: 0 16px 45px -30px color-mix(in oklab, var(--foreground) 30%, transparent);
-  --secondary: oklch(0.965 0.014 252);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.965 0.014 252);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.948 0.029 250);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+    linear-gradient(oklch(0.955 0.027 85 / 94%), oklch(0.955 0.027 85 / 94%)),
+    repeating-linear-gradient(90deg, transparent 0 79px, oklch(0.46 0.06 77 / 12%) 80px),
+    repeating-linear-gradient(0deg, transparent 0 39px, oklch(0.46 0.06 77 / 9%) 40px);
+  --shadow-elegant: 0 28px 70px -36px oklch(0.18 0.04 150 / 55%);
+  --shadow-glow: 0 14px 30px -17px oklch(0.67 0.1 78 / 75%);
+  --shadow-soft: 0 14px 32px -24px oklch(0.19 0.025 65 / 38%);
+  --secondary: oklch(0.91 0.035 82);
+  --secondary-foreground: oklch(0.25 0.05 150);
+  --muted: oklch(0.925 0.025 82);
+  --muted-foreground: oklch(0.45 0.035 70);
+  --accent: oklch(0.68 0.13 42);
+  --accent-foreground: oklch(0.985 0.014 82);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --success: oklch(0.6 0.135 152);
+  --success: oklch(0.48 0.11 148);
   --success-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.78 0.045 78);
+  --input: oklch(0.78 0.045 78);
+  --ring: oklch(0.54 0.1 78);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -157,13 +157,15 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-feature-settings:
-      "cv02",
-      "cv03",
-      "cv04",
-      "cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
   }
 
   ::selection {
@@ -257,5 +259,22 @@
     .text-shimmer {
       animation: none;
     }
+  }
+}
+
+@layer components {
+  .scorecard-surface {
+    position: relative;
+  }
+  .scorecard-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.22;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 119px, var(--border) 120px),
+      repeating-linear-gradient(0deg, transparent 0 47px, var(--border) 48px);
+    mask-image: linear-gradient(to bottom, black, transparent 65%);
   }
 }

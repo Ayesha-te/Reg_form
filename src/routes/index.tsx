@@ -18,17 +18,23 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[var(--gradient-surface)] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[linear-gradient(135deg,oklch(0.58_0.21_264_/_18%),oklch(0.76_0.16_198_/_16%),transparent)]" />
+    <main className="scorecard-surface relative min-h-screen overflow-hidden bg-[var(--gradient-surface)] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[linear-gradient(110deg,oklch(0.19_0.045_155),oklch(0.29_0.07_153))]" />
       <div className="relative mx-auto w-full max-w-7xl py-0 sm:py-4 lg:py-8">
-        <header className="mb-6 flex items-center justify-between rounded-2xl border border-white/70 bg-card/90 px-5 py-1 shadow-sm backdrop-blur">
+        <header className="mb-6 flex items-center justify-between border-b-4 border-[var(--primary-glow)] bg-foreground px-5 py-2 shadow-[var(--shadow-soft)]">
           <div className="flex items-center gap-3">
-            <img src={logoUrl} alt="Event logo" className="h-16 w-24 shrink-0 object-contain" />
+            <img
+              src={logoUrl}
+              alt="STRIDE tournament logo"
+              className="h-16 w-24 shrink-0 object-contain"
+            />
             <div>
-              <p className="text-lg font-black tracking-tight text-foreground">
+              <p className="font-display text-lg font-black tracking-tight text-primary-foreground">
                 Indoor Community League 1.0
               </p>
-              <p className="text-xs font-medium text-muted-foreground">Player registration</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--primary-glow)]">
+                Player registration
+              </p>
             </div>
           </div>
         </header>

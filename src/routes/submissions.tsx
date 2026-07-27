@@ -262,14 +262,18 @@ function SubmissionsPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto border-b-4 border-primary/20 [background:linear-gradient(to_right,var(--card)_30%,transparent),linear-gradient(to_left,var(--card)_30%,transparent)] [background-attachment:local,local]">
             <table className="w-full min-w-[2100px] border-collapse text-left text-sm">
+              <caption className="sr-only">
+                Indoor Community League player registration submissions
+              </caption>
               <thead>
                 <tr className="border-b border-border">
                   {columns.map((column) => (
                     <th
+                      scope="col"
                       key={column}
-                      className="whitespace-nowrap px-4 py-4 text-xs font-bold uppercase tracking-wide text-slate-700"
+                      className="whitespace-nowrap bg-primary px-4 py-4 text-xs font-bold uppercase tracking-wide text-primary-foreground"
                     >
                       {column}
                     </th>
@@ -321,31 +325,31 @@ function SubmissionsPage() {
                         <td className="whitespace-nowrap px-4 py-4 align-middle font-bold text-foreground">
                           {lastName || "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.email}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.mobile}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.whatsappNumber ?? submission.whatsapp_number ?? "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.jerseyName ?? submission.jersey_name ?? "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.jerseySize ?? submission.jersey_size ?? "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.jerseyNumber ?? submission.jersey_number ?? "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.preferredSleeves ?? submission.preferred_sleeves ?? "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.currentClub ?? submission.current_club ?? "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {submission.availability ?? "-"}
                         </td>
                         <td className="px-4 py-4 align-middle">
@@ -364,17 +368,17 @@ function SubmissionsPage() {
                                 ),
                               )
                             ) : (
-                              <span className="text-slate-600">-</span>
+                              <span className="text-muted-foreground">-</span>
                             )}
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {(submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle font-semibold text-primary">
                           {submission.franchiseInterest ?? submission.franchise_interest ?? "-"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {formatDateTime(submission.createdAt ?? submission.created_at)}
                         </td>
                         <td className="whitespace-nowrap px-4 py-4 align-middle">

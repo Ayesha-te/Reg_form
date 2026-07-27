@@ -404,16 +404,15 @@ export function RegistrationForm() {
     <form
       onSubmit={onSubmit}
       noValidate
-      className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-card/95 p-5 shadow-[var(--shadow-elegant)] ring-1 ring-primary/5 backdrop-blur-xl sm:p-9"
+      className="relative overflow-hidden border border-border bg-card p-5 shadow-[var(--shadow-elegant)] ring-1 ring-primary/10 sm:p-9"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-primary opacity-70" />
-      <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-28 left-10 h-52 w-52 rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[var(--primary-glow)]" />
+      <div className="pointer-events-none absolute right-0 top-0 h-44 w-44 border-b border-l border-border/50 bg-[repeating-linear-gradient(45deg,transparent_0_9px,var(--border)_10px_11px)] opacity-30" />
 
       <div className="relative">
         <div className="mb-8 flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
+            <div className="mb-3 inline-flex items-center gap-2 border-l-4 border-[var(--primary-glow)] bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground">
               <Sparkles className="h-3.5 w-3.5" />
               Player registration
             </div>
@@ -425,7 +424,7 @@ export function RegistrationForm() {
             </p>
           </div>
 
-          <div className="min-w-48 rounded-2xl border border-border/70 bg-background/80 p-3.5">
+          <div className="min-w-48 border border-border bg-secondary/55 p-3.5 shadow-[inset_3px_0_0_var(--primary-glow)]">
             <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
               <span>Form completeness</span>
               {progressPercent === 100 ? (
@@ -442,7 +441,7 @@ export function RegistrationForm() {
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
+            <p className="mt-1.5 text-xs text-muted-foreground">
               {completionCount} of {TOTAL_STEPS} details captured
             </p>
           </div>
@@ -821,7 +820,7 @@ export function RegistrationForm() {
               required
               className="sm:col-span-2"
             >
-              <div className="overflow-hidden rounded-2xl border border-primary/25 bg-[linear-gradient(135deg,hsl(var(--primary)/0.1),hsl(var(--background)/0.95),hsl(var(--accent)/0.12))] p-5 shadow-sm">
+              <div className="overflow-hidden border-2 border-[var(--primary-glow)] bg-[linear-gradient(120deg,color-mix(in_oklab,var(--primary)_9%,var(--card)),var(--card)_55%,color-mix(in_oklab,var(--primary-glow)_14%,var(--card)))] p-5 shadow-[var(--shadow-soft)]">
                 <div className="flex items-start gap-3">
                   <span className="rounded-xl bg-primary p-2.5 text-primary-foreground shadow-sm">
                     <Sparkles className="h-5 w-5" />
@@ -969,7 +968,7 @@ function Section({
           className={cn(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-display text-xs font-bold transition-colors duration-500",
             complete
-              ? "border-primary bg-gradient-primary text-primary-foreground shadow-[var(--shadow-glow)]"
+              ? "border-primary bg-primary text-primary-foreground shadow-[var(--shadow-glow)]"
               : "border-border bg-background text-muted-foreground",
           )}
         >

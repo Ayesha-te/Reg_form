@@ -21,9 +21,9 @@ function ThankYou() {
       style={{ backgroundImage: "var(--gradient-surface)" }}
     >
       <div className="absolute left-[-8rem] top-[-8rem] h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
-      <div className="absolute bottom-[-10rem] right-[-8rem] h-96 w-96 rounded-full bg-cyan-400/15 blur-3xl" />
+      <div className="absolute bottom-[-10rem] right-[-8rem] h-96 w-96 rounded-full bg-[var(--primary-glow)]/15 blur-3xl" />
 
-      <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-card/95 p-8 text-center shadow-[var(--shadow-elegant)] backdrop-blur">
+      <div className="relative w-full max-w-lg overflow-hidden border-2 border-[var(--primary-glow)] bg-card p-8 text-center shadow-[var(--shadow-elegant)]">
         <div
           className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-3xl text-primary-foreground shadow-[var(--shadow-glow)]"
           style={{ backgroundImage: "var(--gradient-primary)" }}
