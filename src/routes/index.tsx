@@ -53,7 +53,7 @@ function Index() {
           Registration closed
         </div>
         <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-6xl">
-          Registration for ICRL 3.0 is over
+          Registration for Indoor Community League 1.0 is over
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-muted-foreground sm:text-xl">
           The online registration form is no longer accepting new submissions. Please contact the

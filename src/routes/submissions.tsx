@@ -145,7 +145,7 @@ function SubmissionsPage() {
           <Link to="/" className="flex items-center gap-3">
             <img src={logoUrl} alt="Event logo" className="h-16 w-24 shrink-0 object-contain" />
             <span className="text-2xl font-black tracking-tight text-foreground">
-              Indoor Cricket Rising League 3.0
+              Indoor Community League 1.0
             </span>
           </Link>
 
