@@ -92,20 +92,20 @@ function BannerSlideshow() {
         if (!event.currentTarget.contains(event.relatedTarget)) setIsPaused(false);
       }}
     >
-      <div className="relative h-[42vw] max-h-[424px] w-full overflow-hidden bg-[#100a06]">
+      <div className="relative h-[21.75vw] max-h-[480px] w-full overflow-hidden bg-[#100a06]">
         {banners.map((banner, index) => (
           <img
             key={banner.src}
             src={banner.src}
             alt={banner.alt}
             aria-hidden={index !== activeSlide}
-            className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-700 motion-reduce:transition-none ${
+            className={`absolute inset-0 h-full w-full object-contain object-top transition-opacity duration-700 motion-reduce:transition-none ${
               index === activeSlide ? "opacity-100" : "opacity-0"
             }`}
           />
         ))}
       </div>
-      <div className="absolute inset-x-0 bottom-3 flex justify-center gap-2 sm:bottom-4">
+      <div className="absolute inset-x-0 -bottom-1 flex justify-center gap-2 sm:bottom-0">
         {banners.map((_, index) => (
           <button
             key={index}
