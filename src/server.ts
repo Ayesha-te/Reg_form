@@ -30,6 +30,7 @@ type RegistrationRow =
       availability?: string;
       not_available_on?: string[];
       fee_agreement?: boolean;
+      franchise_interest?: string;
       photo_path?: string;
       original_photo_name?: string;
       created_at?: string;
@@ -50,9 +51,9 @@ const MONGODB_DB = process.env.MONGODB_DB ?? "registrations_db";
 const JERSEY_SIZES = new Set(["Small", "Medium", "Large", "XL", "XXL", "3XL", "4XL"]);
 const PREFERRED_SLEEVES = new Set(["Full Sleeves", "Half Sleeves"]);
 const AVAILABILITY_OPTIONS = new Set(["Available all matches", "Missing few matches"]);
-const REGISTRATION_OPEN = false;
+const REGISTRATION_OPEN = true;
 const REGISTRATION_CLOSED_MESSAGE =
-  "Registration for ICRL 3.0 is closed and no longer accepting new submissions.";
+  "Registration for Indoor Community League 1.0 is currently unavailable.";
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
@@ -161,6 +162,7 @@ async function handleRegistration(request: Request) {
     availability: registration.availability,
     not_available_on: registration.notAvailableOn,
     fee_agreement: registration.feeAgreement,
+    franchise_interest: registration.franchiseInterest,
     photo_path: photoPath,
     original_photo_name: file.name,
     created_at: new Date().toISOString(),
@@ -220,6 +222,7 @@ function normalizeRegistration(formData: FormData) {
       .map((value) => String(value).trim())
       .filter(Boolean),
     feeAgreement: getString(formData, "feeAgreement").trim() === "true",
+    franchiseInterest: getString(formData, "franchiseInterest").trim(),
   };
 }
 
@@ -254,6 +257,10 @@ async function validateRegistration(
   }
   if (!registration.feeAgreement)
     errors.feeAgreement = "You must agree to the registration and match fees.";
+  if (
+    !["Yes, I am interested.", "No, I am not interested."].includes(registration.franchiseInterest)
+  )
+    errors.franchiseInterest = "Select whether you are interested in owning a team franchise.";
 
   if (!(photo instanceof File) || photo.size === 0) {
     errors.photo = "Upload a JPG or PNG photo under 2 MB.";
@@ -286,6 +293,7 @@ function formatRegistration(row: RegistrationRow) {
     availability: row?.availability,
     notAvailableOn: Array.isArray(row?.not_available_on) ? row.not_available_on : [],
     feeAgreement: Boolean(row?.fee_agreement),
+    franchiseInterest: row?.franchise_interest,
     photoPath: row?.photo_path,
     originalPhotoName: row?.original_photo_name,
     createdAt: row?.created_at,

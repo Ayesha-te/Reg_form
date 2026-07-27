@@ -2,8 +2,7 @@ const SUPABASE_STORAGE_BUCKET = "registration-photos";
 const deployedApiBaseUrl = "https://api.stride-events.net";
 
 export const API_BASE_URL = (
-  deployedApiBaseUrl ||
-  (import.meta.env.DEV ? "http://localhost:4000" : "")
+  deployedApiBaseUrl || (import.meta.env.DEV ? "http://localhost:4000" : "")
 ).replace(/\/$/, "");
 
 export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
@@ -12,7 +11,6 @@ export const REGISTRATION_PHOTOS_PUBLIC_BASE_URL = SUPABASE_URL
   ? `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}`
   : "";
 
-  
 export type ApiErrorResponse = {
   ok: false;
   message?: string;
@@ -59,6 +57,8 @@ export type RegistrationSubmission = {
   not_available_on?: string[];
   feeAgreement?: boolean;
   fee_agreement?: boolean;
+  franchiseInterest?: string;
+  franchise_interest?: string;
   dateOfBirth?: string;
   date_of_birth?: string;
   gender?: string;

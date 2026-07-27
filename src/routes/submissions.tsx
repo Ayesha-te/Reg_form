@@ -56,6 +56,7 @@ const columns = [
   "Availability",
   "Not Available On",
   "Fee Agreement",
+  "Franchise Interest",
   "Created At",
   "File",
 ];
@@ -371,6 +372,9 @@ function SubmissionsPage() {
                           {(submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "-"}
                         </td>
                         <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
+                          {submission.franchiseInterest ?? submission.franchise_interest ?? "-"}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-4 align-middle text-slate-600">
                           {formatDateTime(submission.createdAt ?? submission.created_at)}
                         </td>
                         <td className="whitespace-nowrap px-4 py-4 align-middle">
@@ -457,6 +461,8 @@ function getSubmissionSearchText(submission: RegistrationSubmission) {
     submission.availability,
     ...(submission.notAvailableOn ?? submission.not_available_on ?? []),
     (submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "",
+    submission.franchiseInterest,
+    submission.franchise_interest,
     formatDateTime(submission.createdAt ?? submission.created_at),
   ];
 
@@ -489,6 +495,7 @@ function exportSubmissionsToExcel(submissions: RegistrationSubmission[]) {
       submission.availability ?? "",
       (submission.notAvailableOn ?? submission.not_available_on ?? []).join(", "),
       (submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "",
+      submission.franchiseInterest ?? submission.franchise_interest ?? "",
       formatDateTime(submission.createdAt ?? submission.created_at),
       fileUrl ? "View" : "",
       fileUrl ? getPhotoFileKey(submission) : "",

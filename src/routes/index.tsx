@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import logoUrl from "@/components/logo.png";
+import { RegistrationForm } from "@/components/registration/RegistrationForm";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Registration Closed" },
+      { title: "Indoor Community League 1.0 | Player Registration" },
       {
         name: "description",
-        content: "Registration for Indoor Cricket Rising League 3.0 is closed.",
+        content: "Register to play in Indoor Community League 1.0.",
       },
     ],
   }),
@@ -25,19 +26,19 @@ function Index() {
             <img src={logoUrl} alt="Event logo" className="h-16 w-24 shrink-0 object-contain" />
             <div>
               <p className="text-lg font-black tracking-tight text-foreground">
-                Indoor Cricket Rising League 3.0
+                Indoor Community League 1.0
               </p>
               <p className="text-xs font-medium text-muted-foreground">Player registration</p>
             </div>
           </div>
         </header>
-        <RegistrationClosed />
+        <RegistrationForm />
       </div>
     </main>
   );
 }
 
-function RegistrationClosed() {
+/*function RegistrationClosed() {
   const contacts = [
     { name: "Hussein Sancha", phone: "050-8759122", href: "tel:0508759122" },
     { name: "Qasim Ali", phone: "050-7862132", href: "tel:0507862132" },
@@ -78,4 +79,4 @@ function RegistrationClosed() {
       </div>
     </section>
   );
-}
+}*/

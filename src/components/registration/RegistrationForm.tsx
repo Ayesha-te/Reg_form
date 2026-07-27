@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -81,6 +82,9 @@ const schema = z
     feeAgreement: z.literal(true, {
       errorMap: () => ({ message: "You must agree to the registration and match fees" }),
     }),
+    franchiseInterest: z.enum(["Yes, I am interested.", "No, I am not interested."], {
+      message: "Select whether you are interested in owning a team franchise",
+    }),
   })
   .superRefine((values, ctx) => {
     if (values.availability === "Missing few matches" && values.notAvailableOn.length === 0) {
@@ -106,6 +110,7 @@ type FormState = {
   availability: string;
   notAvailableOn: string[];
   feeAgreement: boolean;
+  franchiseInterest: string;
 };
 
 const initial: FormState = {
@@ -122,9 +127,10 @@ const initial: FormState = {
   availability: "",
   notAvailableOn: [],
   feeAgreement: false,
+  franchiseInterest: "",
 };
 
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 14;
 
 type FieldStatus = "neutral" | "valid" | "error";
 
@@ -166,7 +172,13 @@ export function RegistrationForm() {
     const notAvailableComplete =
       values.availability === "Available all matches" || values.notAvailableOn.length > 0 ? 1 : 0;
 
-    return completedFields + notAvailableComplete + (file ? 1 : 0) + (values.feeAgreement ? 1 : 0);
+    return (
+      completedFields +
+      notAvailableComplete +
+      (file ? 1 : 0) +
+      (values.feeAgreement ? 1 : 0) +
+      (values.franchiseInterest ? 1 : 0)
+    );
   }, [file, values]);
 
   const progressPercent = Math.round((completionCount / TOTAL_STEPS) * 100);
@@ -194,7 +206,11 @@ export function RegistrationForm() {
     !errors.currentClub &&
     !errors.availability &&
     !errors.notAvailableOn;
-  const finalComplete = Boolean(file && values.feeAgreement) && !fileError && !errors.feeAgreement;
+  const finalComplete =
+    Boolean(file && values.feeAgreement && values.franchiseInterest) &&
+    !fileError &&
+    !errors.feeAgreement &&
+    !errors.franchiseInterest;
 
   useEffect(() => {
     if (!file) {
@@ -341,6 +357,7 @@ export function RegistrationForm() {
     formData.append("availability", parsed.data.availability);
     parsed.data.notAvailableOn.forEach((matchName) => formData.append("notAvailableOn", matchName));
     formData.append("feeAgreement", String(parsed.data.feeAgreement));
+    formData.append("franchiseInterest", parsed.data.franchiseInterest);
     formData.append("photo", file);
 
     setSubmitting(true);
@@ -401,7 +418,7 @@ export function RegistrationForm() {
               Player registration
             </div>
             <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
-              Indoor Cricket Rising League 3.0
+              Indoor Community League 1.0
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Complete all required player, jersey, availability, and payment agreement details.
@@ -799,6 +816,61 @@ export function RegistrationForm() {
             </Field>
 
             <Field
+              label="Franchise opportunity"
+              error={touched.franchiseInterest ? errors.franchiseInterest : undefined}
+              required
+              className="sm:col-span-2"
+            >
+              <div className="overflow-hidden rounded-2xl border border-primary/25 bg-[linear-gradient(135deg,hsl(var(--primary)/0.1),hsl(var(--background)/0.95),hsl(var(--accent)/0.12))] p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <span className="rounded-xl bg-primary p-2.5 text-primary-foreground shadow-sm">
+                    <Sparkles className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="font-display text-lg font-bold leading-snug text-foreground">
+                      Are you interested in owning a team franchise in this tournament for AED 500?
+                    </p>
+                    <p className="mt-3 text-sm font-semibold text-foreground">
+                      As a Franchise Owner, you will receive:
+                    </p>
+                    <ul className="mt-2 space-y-1.5 text-sm leading-6 text-muted-foreground">
+                      <li>• Exclusive Franchise Ownership Rights</li>
+                      <li>• Branding on your team's official playing kits</li>
+                      <li>• Promotion across the tournament's official social media platforms</li>
+                      <li>• The opportunity to build your team through the live Player Auction</li>
+                    </ul>
+                  </div>
+                </div>
+                <RadioGroup
+                  value={values.franchiseInterest}
+                  onValueChange={(value) => {
+                    setTouched((previousTouched) => ({
+                      ...previousTouched,
+                      franchiseInterest: true,
+                    }));
+                    update("franchiseInterest", value);
+                  }}
+                  className="mt-5 grid gap-2 sm:grid-cols-2"
+                >
+                  {["Yes, I am interested.", "No, I am not interested."].map((option) => (
+                    <Label
+                      key={option}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-3 rounded-xl border bg-background/90 p-4 transition-all",
+                        values.franchiseInterest === option
+                          ? "border-primary ring-2 ring-primary/15"
+                          : "border-input hover:bg-accent",
+                      )}
+                    >
+                      <RadioGroupItem value={option} />
+                      <span className="font-semibold">{option}</span>
+                    </Label>
+                  ))}
+                </RadioGroup>
+              </div>
+            </Field>
+
+            <Field
               label="Fee agreement"
               error={touched.feeAgreement ? errors.feeAgreement : undefined}
               required
@@ -820,7 +892,7 @@ export function RegistrationForm() {
                   }}
                 />
                 <span className="leading-6">
-                  I agree to pay registration fees of AED 60 and match fees of AED 35/- per match.
+                  I agree to pay registration fees of AED 50/- and match fees of AED 40/- per match.
                 </span>
               </label>
             </Field>
