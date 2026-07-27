@@ -7,8 +7,18 @@ import bannerOneUrl from "@/assets/Black and Red Modern Podcast Sport LinkedIn B
 import bannerTwoUrl from "@/assets/ChatGPT Image Jul 21, 2026, 08_10_21 PM.png";
 
 const banners = [
-  { src: bannerOneUrl, alt: "Indoor Community League event banner" },
-  { src: bannerTwoUrl, alt: "Indoor Community League promotional banner" },
+  {
+    src: bannerOneUrl,
+    alt: "Indoor Community League event banner",
+    width: 1640,
+    height: 624,
+  },
+  {
+    src: bannerTwoUrl,
+    alt: "Indoor Community League promotional banner",
+    width: 1942,
+    height: 809,
+  },
 ];
 
 export const Route = createFileRoute("/")({
@@ -90,7 +100,10 @@ function BannerSlideshow() {
         if (!event.currentTarget.contains(event.relatedTarget)) setIsPaused(false);
       }}
     >
-      <div className="relative h-[42vw] max-h-[424px] w-full overflow-hidden bg-[#100a06]">
+      <div
+        className="relative w-full overflow-hidden bg-[#100a06]"
+        style={{ aspectRatio: `${banners[activeSlide].width} / ${banners[activeSlide].height}` }}
+      >
         {banners.map((banner, index) => (
           <img
             key={banner.src}
