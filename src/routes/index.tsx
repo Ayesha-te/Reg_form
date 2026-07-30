@@ -126,6 +126,8 @@ function BannerSlideshow() {
 
 function RegistrationClosed() {
   const contacts = [
+    { name: "Hussein Sancha", phone: "050-8759122", href: "tel:0508759122" },
+    { name: "Qasim Ali", phone: "050-7862132", href: "tel:0507862132" },
     { name: "Quaid Joher", phone: "055-6086529", href: "tel:0556086529" },
   ];
 
