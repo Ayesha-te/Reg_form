@@ -1,10 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Download, LoaderCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Download, LoaderCircle, Minus, Settings2, X } from "lucide-react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import logoUrl from "@/components/logo.png";
 import { type RegistrationsListResponse, type RegistrationSubmission } from "@/lib/api";
-import { matchRosterPlayers, safePlayerFilename, type GalleryPlayer } from "@/lib/players";
+import {
+  findEligiblePlayer,
+  matchRosterPlayers,
+  normalizePlayerName,
+  PLAYER_ROSTER,
+  safePlayerFilename,
+  type GalleryPlayer,
+} from "@/lib/players";
+
+const ROSTER_STORAGE_KEY = "icl-player-roster-v1";
 
 export const Route = createFileRoute("/players")({
   head: () => ({
@@ -22,10 +31,73 @@ function PlayersPage() {
   const [error, setError] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState("");
+  const [roster, setRoster] = useState<string[]>([...PLAYER_ROSTER]);
+  const [managing, setManaging] = useState(false);
+  const [playerName, setPlayerName] = useState("");
+  const [managerMessage, setManagerMessage] = useState("");
   const players = useMemo(
-    () => (submissions.length > 0 ? matchRosterPlayers(submissions) : []),
-    [submissions],
+    () => (submissions.length > 0 ? matchRosterPlayers(submissions, roster) : []),
+    [roster, submissions],
   );
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(ROSTER_STORAGE_KEY);
+      if (!saved) return;
+      const parsed: unknown = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.every((name) => typeof name === "string")) {
+        setRoster(parsed);
+      }
+    } catch {
+      console.warn("[Players] Could not read the saved browser roster.");
+    }
+  }, []);
+
+  function saveRoster(nextRoster: string[]) {
+    setRoster(nextRoster);
+    try {
+      window.localStorage.setItem(ROSTER_STORAGE_KEY, JSON.stringify(nextRoster));
+    } catch {
+      setManagerMessage("The roster changed, but this browser could not save it.");
+    }
+  }
+
+  function addPlayer(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const result = findEligiblePlayer(submissions, playerName);
+    if (result.status === "not-found") {
+      setManagerMessage("No registration with that exact name and a photo was found.");
+      return;
+    }
+    if (result.status === "ambiguous") {
+      setManagerMessage("More than one registration matches that name. Nothing was added.");
+      return;
+    }
+    if (roster.some((name) => normalizePlayerName(name) === normalizePlayerName(result.name))) {
+      setManagerMessage(`${result.name} is already on the player wall.`);
+      return;
+    }
+    saveRoster([...roster, result.name]);
+    setPlayerName("");
+    setManagerMessage(`${result.name} was added.`);
+  }
+
+  function removePlayer(name: string) {
+    if (!window.confirm(`Remove ${name} from the player wall?`)) return;
+    saveRoster(
+      roster.filter((rosterName) => normalizePlayerName(rosterName) !== normalizePlayerName(name)),
+    );
+    setManagerMessage(`${name} was removed.`);
+  }
+
+  function restoreRoster() {
+    if (
+      !window.confirm("Restore the original player roster? Your browser changes will be replaced.")
+    )
+      return;
+    saveRoster([...PLAYER_ROSTER]);
+    setManagerMessage("The original player roster was restored.");
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -115,28 +187,84 @@ function PlayersPage() {
 
       <section className="mx-auto max-w-[1500px] px-5 pb-20 pt-12 sm:px-8 sm:pt-16 lg:px-12 lg:pt-20">
         <p className="sr-only" role="status" aria-live="polite">
-          {downloadStatus}
+          {downloadStatus || managerMessage}
         </p>
-        <div className="mb-10 flex flex-col gap-7 border-b-4 border-[#171719] pb-8 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="max-w-4xl font-display text-[clamp(2.5rem,7vw,6.5rem)] font-black leading-[0.9] tracking-[-0.045em]">
-            Indoor Community
-            <br className="hidden sm:block" /> League 1.0{" "}
-            <span className="text-[#c51d2b]">Players</span>
-          </h1>
-          {!loading && !error && players.length > 0 && (
-            <button
-              type="button"
-              onClick={() => void downloadAll()}
-              disabled={downloadingAll}
-              className="inline-flex h-12 shrink-0 items-center justify-center gap-2 border-2 border-[#171719] bg-[#171719] px-5 text-sm font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-[#c51d2b] focus-visible:outline-[#c51d2b] disabled:cursor-wait disabled:opacity-60"
-            >
-              {downloadingAll ? (
-                <LoaderCircle className="size-4 animate-spin" />
-              ) : (
-                <Download className="size-4" />
+        <div className="mb-8 border-b-4 border-[#171719] pb-7 sm:mb-12">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <h1 className="max-w-3xl font-display text-[clamp(2rem,5vw,4rem)] font-black leading-[0.94] tracking-[-0.04em]">
+              Indoor Community
+              <br className="hidden sm:block" /> League 1.0{" "}
+              <span className="text-[#c51d2b]">Players</span>
+            </h1>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setManaging((open) => !open)}
+                aria-expanded={managing}
+                aria-controls="player-manager"
+                className="inline-flex h-12 items-center justify-center gap-2 border-2 border-[#171719] px-4 text-xs font-extrabold uppercase tracking-[0.12em] transition hover:bg-white focus-visible:outline-[#c51d2b]"
+              >
+                {managing ? <X className="size-4" /> : <Settings2 className="size-4" />}{" "}
+                {managing ? "Close manager" : "Manage players"}
+              </button>
+              {!loading && !error && players.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => void downloadAll()}
+                  disabled={downloadingAll}
+                  className="inline-flex h-12 shrink-0 items-center justify-center gap-2 border-2 border-[#171719] bg-[#171719] px-5 text-sm font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-[#c51d2b] focus-visible:outline-[#c51d2b] disabled:cursor-wait disabled:opacity-60"
+                >
+                  {downloadingAll ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : (
+                    <Download className="size-4" />
+                  )}
+                  {downloadingAll ? "Preparing" : "Download all"}
+                </button>
               )}
-              {downloadingAll ? "Preparing" : "Download all"}
-            </button>
+            </div>
+          </div>
+          {managing && (
+            <aside
+              id="player-manager"
+              className="mt-7 border-l-4 border-[#c51d2b] bg-[#ebe6dc] p-4 sm:p-5"
+            >
+              <form onSubmit={addPlayer} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <label className="min-w-0 flex-1 text-xs font-extrabold uppercase tracking-[0.13em]">
+                  Add by full registration name
+                  <input
+                    value={playerName}
+                    onChange={(event) => setPlayerName(event.target.value)}
+                    required
+                    autoComplete="off"
+                    placeholder="Type the exact player name"
+                    className="mt-2 h-12 w-full border-2 border-[#171719] bg-[#f8f6f1] px-3 text-base font-medium normal-case tracking-normal outline-none focus:border-[#c51d2b]"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={loading || error}
+                  className="h-12 border-2 border-[#171719] bg-[#c51d2b] px-5 text-xs font-extrabold uppercase tracking-[0.12em] text-white hover:bg-[#171719] focus-visible:outline-[#c51d2b] disabled:opacity-50"
+                >
+                  Add player
+                </button>
+                <button
+                  type="button"
+                  onClick={restoreRoster}
+                  className="h-12 border-2 border-[#171719] px-4 text-xs font-extrabold uppercase tracking-[0.1em] hover:bg-white focus-visible:outline-[#c51d2b]"
+                >
+                  Restore original
+                </button>
+              </form>
+              <p className="mt-3 text-xs leading-relaxed text-black/65">
+                Photos come only from exact registration matches. Changes are saved on this browser.
+              </p>
+              {managerMessage && (
+                <p className="mt-2 text-sm font-bold" role="status">
+                  {managerMessage}
+                </p>
+              )}
+            </aside>
           )}
         </div>
 
@@ -168,6 +296,16 @@ function PlayersPage() {
                 className="group relative overflow-hidden bg-[#202023] shadow-[0_12px_30px_-20px_rgba(0,0,0,.75)] [animation:player-reveal_.5s_both]"
                 style={{ animationDelay: `${Math.min(index * 35, 450)}ms` }}
               >
+                {managing && (
+                  <button
+                    type="button"
+                    onClick={() => removePlayer(player.name)}
+                    aria-label={`Remove ${player.name} from the player wall`}
+                    className="absolute right-2 top-2 z-10 inline-flex min-h-10 items-center gap-1 border border-white/70 bg-[#171719]/90 px-2.5 text-[.68rem] font-extrabold uppercase tracking-wider text-white shadow-lg hover:bg-[#c51d2b] focus-visible:outline-white"
+                  >
+                    <Minus className="size-3.5" /> Remove
+                  </button>
+                )}
                 <div className="aspect-[4/5] overflow-hidden bg-[#252528]">
                   <img
                     src={player.photoUrl}

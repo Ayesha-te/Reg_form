@@ -130,7 +130,31 @@ export function getSubmissionPhotoUrl(submission: RegistrationSubmission) {
   return `${API_BASE_URL}/${cleanPath}`;
 }
 
-export function matchRosterPlayers(submissions: RegistrationSubmission[]): GalleryPlayer[] {
+export type PlayerMatchResult =
+  | { status: "matched"; name: string }
+  | { status: "not-found" }
+  | { status: "ambiguous" };
+
+export function findEligiblePlayer(
+  submissions: RegistrationSubmission[],
+  requestedName: string,
+): PlayerMatchResult {
+  const key = normalizePlayerName(requestedName);
+  if (!key) return { status: "not-found" };
+  const matches = submissions.filter(
+    (submission) =>
+      normalizePlayerName(getSubmissionName(submission)) === key &&
+      Boolean(getSubmissionPhotoUrl(submission)),
+  );
+  if (matches.length === 0) return { status: "not-found" };
+  if (matches.length > 1) return { status: "ambiguous" };
+  return { status: "matched", name: getSubmissionName(matches[0]).trim() };
+}
+
+export function matchRosterPlayers(
+  submissions: RegistrationSubmission[],
+  roster: readonly string[] = PLAYER_ROSTER,
+): GalleryPlayer[] {
   const recordsByName = new Map<string, RegistrationSubmission[]>();
   for (const submission of submissions) {
     const key = normalizePlayerName(getSubmissionName(submission));
@@ -138,7 +162,7 @@ export function matchRosterPlayers(submissions: RegistrationSubmission[]): Galle
     recordsByName.set(key, [...(recordsByName.get(key) ?? []), submission]);
   }
 
-  return PLAYER_ROSTER.flatMap((rosterName) => {
+  return roster.flatMap((rosterName) => {
     const matches = (recordsByName.get(normalizePlayerName(rosterName)) ?? []).filter((record) =>
       Boolean(getSubmissionPhotoUrl(record)),
     );
