@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Download, LoaderCircle, Minus, Settings2, X } from "lucide-react";
+import { Download, FileDown, LoaderCircle, Minus, Settings2, X } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import logoUrl from "@/components/logo.png";
@@ -30,6 +30,7 @@ function PlayersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState("");
   const [roster, setRoster] = useState<string[]>([...PLAYER_ROSTER]);
   const [managing, setManaging] = useState(false);
@@ -159,6 +160,26 @@ function PlayersPage() {
     }
   }
 
+  async function exportPdf() {
+    setExportingPdf(true);
+    setDownloadStatus("Preparing PDF. Player photos are being arranged for print.");
+    try {
+      const { createPlayerPdf, downloadPlayerPdf } = await import("@/lib/player-pdf");
+      const result = await createPlayerPdf(players, logoUrl);
+      downloadPlayerPdf(result.blob);
+      setDownloadStatus(
+        result.warningCount > 0
+          ? `PDF downloaded with ${result.warningCount} photo ${result.warningCount === 1 ? "warning" : "warnings"}. Player names are still included.`
+          : `PDF downloaded with all ${players.length} players.`,
+      );
+    } catch (exportError) {
+      console.error("[Players] Could not prepare the player PDF.", exportError);
+      setDownloadStatus("The player PDF could not be downloaded. Please try again.");
+    } finally {
+      setExportingPdf(false);
+    }
+  }
+
   return (
     <main className="players-page min-h-screen bg-[#f4f1eb] text-[#171719]">
       <header className="border-b border-black/15 bg-[#f8f6f1]">
@@ -199,19 +220,36 @@ function PlayersPage() {
                 {managing ? "Close manager" : "Manage players"}
               </button>
               {!loading && !error && players.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => void downloadAll()}
-                  disabled={downloadingAll}
-                  className="inline-flex h-12 shrink-0 items-center justify-center gap-2 border-2 border-[#171719] bg-[#171719] px-5 text-sm font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-[#c51d2b] focus-visible:outline-[#c51d2b] disabled:cursor-wait disabled:opacity-60"
-                >
-                  {downloadingAll ? (
-                    <LoaderCircle className="size-4 animate-spin" />
-                  ) : (
-                    <Download className="size-4" />
-                  )}
-                  {downloadingAll ? "Preparing" : "Download all"}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => void downloadAll()}
+                    disabled={downloadingAll || exportingPdf}
+                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 border-2 border-[#171719] bg-[#171719] px-5 text-sm font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-[#c51d2b] focus-visible:outline-[#c51d2b] disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {downloadingAll ? (
+                      <LoaderCircle className="size-4 animate-spin" />
+                    ) : (
+                      <Download className="size-4" />
+                    )}
+                    {downloadingAll ? "Preparing" : "Download all"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void exportPdf()}
+                    disabled={
+                      loading || error || players.length === 0 || exportingPdf || downloadingAll
+                    }
+                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 border-2 border-[#171719] bg-[#f8f6f1] px-4 text-xs font-extrabold uppercase tracking-[0.12em] transition hover:bg-white focus-visible:outline-[#c51d2b] disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {exportingPdf ? (
+                      <LoaderCircle className="size-4 animate-spin" />
+                    ) : (
+                      <FileDown className="size-4" />
+                    )}
+                    {exportingPdf ? "Preparing PDF" : "Export PDF"}
+                  </button>
+                </>
               )}
             </div>
           </div>
