@@ -90,15 +90,6 @@ function PlayersPage() {
     setManagerMessage(`${name} was removed.`);
   }
 
-  function restoreRoster() {
-    if (
-      !window.confirm("Restore the original player roster? Your browser changes will be replaced.")
-    )
-      return;
-    saveRoster([...PLAYER_ROSTER]);
-    setManagerMessage("The original player roster was restored.");
-  }
-
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
@@ -247,13 +238,6 @@ function PlayersPage() {
                   className="h-12 border-2 border-[#171719] bg-[#c51d2b] px-5 text-xs font-extrabold uppercase tracking-[0.12em] text-white hover:bg-[#171719] focus-visible:outline-[#c51d2b] disabled:opacity-50"
                 >
                   Add player
-                </button>
-                <button
-                  type="button"
-                  onClick={restoreRoster}
-                  className="h-12 border-2 border-[#171719] px-4 text-xs font-extrabold uppercase tracking-[0.1em] hover:bg-white focus-visible:outline-[#c51d2b]"
-                >
-                  Restore original
                 </button>
               </form>
               <p className="mt-3 text-xs leading-relaxed text-black/65">
