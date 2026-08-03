@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ThankYouRouteImport } from './routes/thank-you'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as PlayersRouteImport } from './routes/players'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ThankYouRoute = ThankYouRouteImport.update({
@@ -23,6 +24,11 @@ const SubmissionsRoute = SubmissionsRouteImport.update({
   path: '/submissions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayersRoute = PlayersRouteImport.update({
+  id: '/players',
+  path: '/players',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/players': typeof PlayersRoute
   '/submissions': typeof SubmissionsRoute
   '/thank-you': typeof ThankYouRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/players': typeof PlayersRoute
   '/submissions': typeof SubmissionsRoute
   '/thank-you': typeof ThankYouRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/players': typeof PlayersRoute
   '/submissions': typeof SubmissionsRoute
   '/thank-you': typeof ThankYouRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/submissions' | '/thank-you'
+  fullPaths: '/' | '/players' | '/submissions' | '/thank-you'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/submissions' | '/thank-you'
-  id: '__root__' | '/' | '/submissions' | '/thank-you'
+  to: '/' | '/players' | '/submissions' | '/thank-you'
+  id: '__root__' | '/' | '/players' | '/submissions' | '/thank-you'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PlayersRoute: typeof PlayersRoute
   SubmissionsRoute: typeof SubmissionsRoute
   ThankYouRoute: typeof ThankYouRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/players': {
+      id: '/players'
+      path: '/players'
+      fullPath: '/players'
+      preLoaderRoute: typeof PlayersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PlayersRoute: PlayersRoute,
   SubmissionsRoute: SubmissionsRoute,
   ThankYouRoute: ThankYouRoute,
 }

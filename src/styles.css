@@ -176,6 +176,17 @@
 /* Ambient, restrained motion for the primary call-to-action. Respects
    reduced-motion preferences so it never overrides accessibility settings. */
 @layer utilities {
+  @keyframes player-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @keyframes pulse-glow {
     0%,
     100% {

@@ -54,6 +54,7 @@ const AVAILABILITY_OPTIONS = new Set(["Available all matches", "Missing few matc
 const REGISTRATION_OPEN = false;
 const REGISTRATION_CLOSED_MESSAGE =
   "Registration for Indoor Community League 1.0 is closed. Please get ready early next time because spots move fast.";
+const PLAYER_GALLERY_SOURCE = "https://api.stride-events.net";
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
@@ -79,6 +80,42 @@ async function getRegistrationsCollection() {
 
 async function handleApiRequest(request: Request): Promise<Response | null> {
   const url = new URL(request.url);
+
+  if (request.method === "GET" && url.pathname === "/api/player-gallery") {
+    const upstream = await fetch(`${PLAYER_GALLERY_SOURCE}/api/registrations`, {
+      headers: { accept: "application/json" },
+    });
+    return new Response(upstream.body, {
+      status: upstream.status,
+      headers: {
+        "content-type": upstream.headers.get("content-type") ?? "application/json; charset=utf-8",
+        "cache-control": "public, max-age=60, stale-while-revalidate=300",
+      },
+    });
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/player-gallery/photo") {
+    const source = url.searchParams.get("url");
+    if (!source) return json(400, { ok: false, message: "Missing photo URL." });
+    let photoUrl: URL;
+    try {
+      photoUrl = new URL(source);
+    } catch {
+      return json(400, { ok: false, message: "Invalid photo URL." });
+    }
+    if (photoUrl.protocol !== "https:" || photoUrl.hostname !== "res.cloudinary.com") {
+      return json(400, { ok: false, message: "Unsupported photo host." });
+    }
+    const upstream = await fetch(photoUrl, { headers: { accept: "image/*" } });
+    if (!upstream.ok) return json(upstream.status, { ok: false, message: "Photo unavailable." });
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        "content-type": upstream.headers.get("content-type") ?? "image/jpeg",
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+      },
+    });
+  }
 
   if (request.method === "GET" && url.pathname === "/api/health") {
     return json(200, { ok: true, service: "registration-api", storage: "mongodb" });
