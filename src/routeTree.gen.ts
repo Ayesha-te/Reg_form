@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ThankYouRouteImport } from './routes/thank-you'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as PrivateRegistration7h4k9mRouteImport } from './routes/private-registration-7h4k9m'
 import { Route as PlayersRouteImport } from './routes/players'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -24,6 +25,12 @@ const SubmissionsRoute = SubmissionsRouteImport.update({
   path: '/submissions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivateRegistration7h4k9mRoute =
+  PrivateRegistration7h4k9mRouteImport.update({
+    id: '/private-registration-7h4k9m',
+    path: '/private-registration-7h4k9m',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PlayersRoute = PlayersRouteImport.update({
   id: '/players',
   path: '/players',
@@ -38,12 +45,14 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/players': typeof PlayersRoute
+  '/private-registration-7h4k9m': typeof PrivateRegistration7h4k9mRoute
   '/submissions': typeof SubmissionsRoute
   '/thank-you': typeof ThankYouRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/players': typeof PlayersRoute
+  '/private-registration-7h4k9m': typeof PrivateRegistration7h4k9mRoute
   '/submissions': typeof SubmissionsRoute
   '/thank-you': typeof ThankYouRoute
 }
@@ -51,20 +60,38 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/players': typeof PlayersRoute
+  '/private-registration-7h4k9m': typeof PrivateRegistration7h4k9mRoute
   '/submissions': typeof SubmissionsRoute
   '/thank-you': typeof ThankYouRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/players' | '/submissions' | '/thank-you'
+  fullPaths:
+    | '/'
+    | '/players'
+    | '/private-registration-7h4k9m'
+    | '/submissions'
+    | '/thank-you'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/players' | '/submissions' | '/thank-you'
-  id: '__root__' | '/' | '/players' | '/submissions' | '/thank-you'
+  to:
+    | '/'
+    | '/players'
+    | '/private-registration-7h4k9m'
+    | '/submissions'
+    | '/thank-you'
+  id:
+    | '__root__'
+    | '/'
+    | '/players'
+    | '/private-registration-7h4k9m'
+    | '/submissions'
+    | '/thank-you'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PlayersRoute: typeof PlayersRoute
+  PrivateRegistration7h4k9mRoute: typeof PrivateRegistration7h4k9mRoute
   SubmissionsRoute: typeof SubmissionsRoute
   ThankYouRoute: typeof ThankYouRoute
 }
@@ -83,6 +110,13 @@ declare module '@tanstack/react-router' {
       path: '/submissions'
       fullPath: '/submissions'
       preLoaderRoute: typeof SubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/private-registration-7h4k9m': {
+      id: '/private-registration-7h4k9m'
+      path: '/private-registration-7h4k9m'
+      fullPath: '/private-registration-7h4k9m'
+      preLoaderRoute: typeof PrivateRegistration7h4k9mRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/players': {
@@ -105,6 +139,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PlayersRoute: PlayersRoute,
+  PrivateRegistration7h4k9mRoute: PrivateRegistration7h4k9mRoute,
   SubmissionsRoute: SubmissionsRoute,
   ThankYouRoute: ThankYouRoute,
 }

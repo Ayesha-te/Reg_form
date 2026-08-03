@@ -144,7 +144,11 @@ function fieldStatus(
   return hasValue ? "valid" : "neutral";
 }
 
-export function RegistrationForm() {
+type RegistrationFormProps = {
+  submitPath?: string;
+};
+
+export function RegistrationForm({ submitPath = "/api/registrations" }: RegistrationFormProps) {
   const navigate = useNavigate();
   const [values, setValues] = useState<FormState>(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -362,7 +366,7 @@ export function RegistrationForm() {
 
     setSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/registrations`, {
+      const response = await fetch(`${API_BASE_URL}${submitPath}`, {
         method: "POST",
         body: formData,
       });
@@ -404,14 +408,14 @@ export function RegistrationForm() {
     <form
       onSubmit={onSubmit}
       noValidate
-      className="relative overflow-hidden border border-border bg-card p-5 shadow-[var(--shadow-elegant)] ring-1 ring-primary/10 sm:p-9"
+      className="relative min-w-0 max-w-full overflow-hidden border border-border bg-card p-5 shadow-[var(--shadow-elegant)] ring-1 ring-primary/10 sm:p-9"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[var(--primary-glow)]" />
       <div className="pointer-events-none absolute right-0 top-0 h-44 w-44 border-b border-l border-border/50 bg-[repeating-linear-gradient(45deg,transparent_0_9px,var(--border)_10px_11px)] opacity-30" />
 
-      <div className="relative">
+      <div className="relative min-w-0">
         <div className="mb-8 flex flex-col gap-4 border-b border-border/70 pb-6 md:flex-row md:items-center md:justify-between">
-          <div>
+          <div className="min-w-0">
             <div className="mb-3 inline-flex items-center gap-2 border-l-4 border-[var(--primary-glow)] bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground">
               <Sparkles className="h-3.5 w-3.5" />
               Player registration
@@ -424,7 +428,7 @@ export function RegistrationForm() {
             </p>
           </div>
 
-          <div className="min-w-48 border border-border bg-secondary/55 p-3.5 shadow-[inset_3px_0_0_var(--primary-glow)]">
+          <div className="w-full min-w-0 border border-border bg-secondary/55 p-3.5 shadow-[inset_3px_0_0_var(--primary-glow)] md:w-auto md:min-w-48">
             <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
               <span>Form completeness</span>
               {progressPercent === 100 ? (
@@ -902,7 +906,7 @@ export function RegistrationForm() {
           <Button
             type="submit"
             disabled={submitting}
-            className="animate-pulse-glow h-11 min-w-56 rounded-xl px-8 text-sm font-semibold shadow-[var(--shadow-glow)]"
+            className="animate-pulse-glow h-11 w-full max-w-56 rounded-xl px-8 text-sm font-semibold shadow-[var(--shadow-glow)]"
           >
             {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {submitting ? "Submitting" : "Submit registration"}
@@ -950,7 +954,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <div className="flex gap-4 sm:gap-5">
+    <div className="flex min-w-0 gap-3 sm:gap-5">
       <div className="flex flex-col items-center">
         <span
           className={cn(
@@ -972,7 +976,7 @@ function Section({
         )}
       </div>
 
-      <div className={cn("flex-1 pt-0.5", isLast ? "pb-1" : "pb-9")}>
+      <div className={cn("min-w-0 flex-1 pt-0.5", isLast ? "pb-1" : "pb-9")}>
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-primary" />
           <h3 className="font-display text-sm font-bold uppercase tracking-wide text-foreground/90">
@@ -984,7 +988,7 @@ function Section({
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
 
-        <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">{children}</div>
+        <div className="mt-4 grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2">{children}</div>
       </div>
     </div>
   );
@@ -1034,7 +1038,7 @@ function Field({
   className?: string;
 }) {
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("min-w-0 space-y-2", className)}>
       <Label className="block text-sm font-semibold">
         {label}
         {required && <span className="ml-1 text-destructive">*</span>}

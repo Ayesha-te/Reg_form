@@ -132,7 +132,11 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
   }
 
   if (request.method === "POST" && url.pathname === "/api/registrations") {
-    return handleRegistration(request);
+    return handleRegistration(request, { requireRegistrationOpen: true });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/private-registration-7h4k9m") {
+    return handleRegistration(request, { requireRegistrationOpen: false });
   }
 
   if (request.method === "GET" && url.pathname.startsWith("/uploads/")) {
@@ -146,8 +150,11 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
   return null;
 }
 
-async function handleRegistration(request: Request) {
-  if (!REGISTRATION_OPEN) {
+async function handleRegistration(
+  request: Request,
+  { requireRegistrationOpen }: { requireRegistrationOpen: boolean },
+) {
+  if (requireRegistrationOpen && !REGISTRATION_OPEN) {
     return json(403, {
       ok: false,
       message: REGISTRATION_CLOSED_MESSAGE,
