@@ -816,9 +816,9 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
           <p className="text-sm font-semibold text-foreground">For more information, contact:</p>
           <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
             <p>
-              Quaid Joher{" "}
+              Ravi Teja {" "}
               <a className="font-medium text-foreground hover:text-primary" href="tel:0556086529">
-                055-6086529
+               +971 52 279 2909
               </a>
             </p>
           </div>
