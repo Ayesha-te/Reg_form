@@ -78,15 +78,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Indoor Community League 1.0 | Player Registration" },
+      { title: "Avengers Community League 1.0 | Player Registration" },
       {
         name: "description",
-        content: "Register to play in Indoor Community League 1.0.",
+        content: "Register to play in Avengers Community League 1.0.",
       },
-      { property: "og:title", content: "Indoor Community League 1.0" },
+      { property: "og:title", content: "Avengers Community League 1.0" },
       {
         property: "og:description",
-        content: "Register to play in Indoor Community League 1.0.",
+        content: "Register to play in Avengers Community League 1.0.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

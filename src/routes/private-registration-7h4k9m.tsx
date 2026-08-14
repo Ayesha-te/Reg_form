@@ -6,10 +6,10 @@ import { RegistrationPageShell } from "@/components/registration/RegistrationPag
 export const Route = createFileRoute("/private-registration-7h4k9m")({
   head: () => ({
     meta: [
-      { title: "Indoor Community League 1.0 | Player Registration" },
+      { title: "Avengers Community League 1.0 | Player Registration" },
       {
         name: "description",
-        content: "Register to play in Indoor Community League 1.0.",
+        content: "Register to play in Avengers Community League 1.0.",
       },
       { name: "robots", content: "noindex,nofollow" },
     ],

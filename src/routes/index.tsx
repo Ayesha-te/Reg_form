@@ -5,10 +5,10 @@ import { RegistrationPageShell } from "@/components/registration/RegistrationPag
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Indoor Community League 1.0 | Player Registration" },
+      { title: "Avengers Community League 1.0 | Player Registration" },
       {
         name: "description",
-        content: "Register to play in Indoor Community League 1.0.",
+        content: "Register to play in Avengers Community League 1.0.",
       },
     ],
   }),
@@ -38,7 +38,7 @@ function RegistrationClosed() {
           Registration closed
         </div>
         <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-6xl">
-          The squad list is locked for Indoor Community League 1.0
+          The squad list is locked for Avengers Community League 1.0
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-muted-foreground sm:text-xl">
           Registrations are now closed, and no new player entries are being accepted. If you missed

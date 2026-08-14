@@ -53,7 +53,7 @@ const PREFERRED_SLEEVES = new Set(["Full Sleeves", "Half Sleeves"]);
 const AVAILABILITY_OPTIONS = new Set(["Available all matches", "Missing few matches"]);
 const REGISTRATION_OPEN = false;
 const REGISTRATION_CLOSED_MESSAGE =
-  "Registration for Indoor Community League 1.0 is closed. Please get ready early next time because spots move fast.";
+  "Registration for Avengers Community League 1.0 is closed. Please get ready early next time because spots move fast.";
 const PLAYER_GALLERY_SOURCE = "https://api.stride-events.net";
 
 async function getServerEntry(): Promise<ServerEntry> {

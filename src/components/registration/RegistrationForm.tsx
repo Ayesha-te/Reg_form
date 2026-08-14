@@ -421,7 +421,7 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
               Player registration
             </div>
             <h2 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
-              Indoor Community League 1.0
+              Avengers Community League 1.0
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Complete all required player, jersey, availability, and payment agreement details.

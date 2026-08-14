@@ -75,7 +75,7 @@ function drawPageFrame(
   document.setTextColor(23, 23, 25);
   document.setFont("helvetica", "bold");
   document.setFontSize(14);
-  document.text("Indoor Community League 1.0 Players", logoData ? 35 : MARGIN_X, 17);
+  document.text("Avengers Community League 1.0 Players", logoData ? 35 : MARGIN_X, 17);
   document.setDrawColor(197, 29, 43);
   document.setLineWidth(1.2);
   document.line(MARGIN_X, 27, PAGE_WIDTH - MARGIN_X, 27);
@@ -83,7 +83,7 @@ function drawPageFrame(
   document.setFontSize(7.5);
   document.setTextColor(80, 80, 82);
   document.text(
-    `Indoor Community League 1.0 - Page ${pageNumber} of ${totalPages}`,
+    `Avengers Community League 1.0 - Page ${pageNumber} of ${totalPages}`,
     PAGE_WIDTH / 2,
     PAGE_HEIGHT - 8,
     { align: "center" },

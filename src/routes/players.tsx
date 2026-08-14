@@ -18,8 +18,8 @@ const ROSTER_STORAGE_KEY = "icl-player-roster-v1";
 export const Route = createFileRoute("/players")({
   head: () => ({
     meta: [
-      { title: "Players | Indoor Community League 1.0" },
-      { name: "description", content: "The official Indoor Community League 1.0 player gallery." },
+      { title: "Players | Avengers Community League 1.0" },
+      { name: "description", content: "The official Avengers Community League 1.0 player gallery." },
     ],
   }),
   component: PlayersPage,
@@ -186,12 +186,12 @@ function PlayersPage() {
         <div className="mx-auto flex max-w-[1500px] items-center px-5 py-4 sm:px-8 lg:px-12">
           <Link
             to="/"
-            aria-label="Indoor Community League home"
+            aria-label="Avengers Community League home"
             className="inline-flex items-center gap-3"
           >
             <img src={logoUrl} alt="" className="h-14 w-20 object-contain sm:h-16 sm:w-24" />
             <span className="hidden text-xs font-extrabold uppercase tracking-[0.22em] sm:block">
-              Indoor Community League 1.0
+              Avengers Community League 1.0
             </span>
           </Link>
         </div>

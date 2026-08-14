@@ -145,7 +145,7 @@ function SubmissionsPage() {
           <Link to="/" className="flex items-center gap-3">
             <img src={logoUrl} alt="Event logo" className="h-16 w-24 shrink-0 object-contain" />
             <span className="text-2xl font-black tracking-tight text-foreground">
-              Indoor Community League 1.0
+              Avengers Community League 1.0
             </span>
           </Link>
 
@@ -265,7 +265,7 @@ function SubmissionsPage() {
           <div className="overflow-x-auto border-b-4 border-primary/20 [background:linear-gradient(to_right,var(--card)_30%,transparent),linear-gradient(to_left,var(--card)_30%,transparent)] [background-attachment:local,local]">
             <table className="w-full min-w-[2100px] border-collapse text-left text-sm">
               <caption className="sr-only">
-                Indoor Community League player registration submissions
+                Avengers Community League player registration submissions
               </caption>
               <thead>
                 <tr className="border-b border-border">

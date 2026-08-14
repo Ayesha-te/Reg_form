@@ -6,9 +6,9 @@ import bannerThreeUrl from "@/assets/Gemini_Generated_Image_v5wuawv5wuawv5wu.png
 import logoUrl from "@/components/logo.png";
 
 const banners = [
-  { src: bannerOneUrl, alt: "Indoor Community League event banner" },
-  { src: bannerTwoUrl, alt: "Indoor Community League promotional banner" },
-  { src: bannerThreeUrl, alt: "Indoor Community League sponsor banner" },
+  { src: bannerOneUrl, alt: "Avengers Community League event banner" },
+  { src: bannerTwoUrl, alt: "Avengers Community League promotional banner" },
+  { src: bannerThreeUrl, alt: "Avengers Community League sponsor banner" },
 ];
 
 export function RegistrationPageShell({ children }: { children: ReactNode }) {
@@ -28,7 +28,7 @@ export function RegistrationPageShell({ children }: { children: ReactNode }) {
             />
             <div className="min-w-0">
               <p className="font-display text-base font-black leading-tight tracking-tight text-primary-foreground sm:text-lg">
-                Indoor Community League 1.0
+                Avengers Community League 1.0
               </p>
               <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--primary-glow)] sm:mt-0 sm:text-xs sm:tracking-[0.18em]">
                 Player registration
