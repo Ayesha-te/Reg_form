@@ -74,7 +74,6 @@ const schema = z
     preferredSleeves: z.enum(["Full Sleeves", "Half Sleeves"], {
       message: "Select preferred sleeves",
     }),
-    currentClub: z.string().trim().max(120),
     availability: z.enum(["Available all matches", "Missing few matches"], {
       message: "Select availability",
     }),
@@ -106,7 +105,6 @@ type FormState = {
   jerseyNumber: string;
   jerseySize: string;
   preferredSleeves: string;
-  currentClub: string;
   availability: string;
   notAvailableOn: string[];
   feeAgreement: boolean;
@@ -123,7 +121,6 @@ const initial: FormState = {
   jerseyNumber: "",
   jerseySize: "",
   preferredSleeves: "",
-  currentClub: "",
   availability: "",
   notAvailableOn: [],
   feeAgreement: false,
@@ -207,7 +204,6 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
   const availabilityComplete =
     Boolean(values.availability) &&
     (values.availability === "Available all matches" || values.notAvailableOn.length > 0) &&
-    !errors.currentClub &&
     !errors.availability &&
     !errors.notAvailableOn;
   const finalComplete =
@@ -357,7 +353,6 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
     formData.append("jerseyNumber", parsed.data.jerseyNumber);
     formData.append("jerseySize", parsed.data.jerseySize);
     formData.append("preferredSleeves", parsed.data.preferredSleeves);
-    formData.append("currentClub", parsed.data.currentClub);
     formData.append("availability", parsed.data.availability);
     parsed.data.notAvailableOn.forEach((matchName) => formData.append("notAvailableOn", matchName));
     formData.append("feeAgreement", String(parsed.data.feeAgreement));
@@ -664,28 +659,9 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
             total={4}
             icon={UsersRound}
             title="Availability"
-            description="Current club/team (optional) and match availability."
+            description="Match availability."
             complete={availabilityComplete}
           >
-            <Field
-              label="Current Club/Team"
-              hint="Optional"
-              error={touched.currentClub ? errors.currentClub : undefined}
-            >
-              <StatusInput
-                icon={UsersRound}
-                status={fieldStatus(
-                  Boolean(touched.currentClub),
-                  errors.currentClub,
-                  Boolean(values.currentClub),
-                )}
-                value={values.currentClub}
-                onChange={(event) => update("currentClub", event.target.value)}
-                onBlur={() => markTouched("currentClub")}
-                placeholder="Club or team name (optional)"
-              />
-            </Field>
-
             <Field
               label="Availability"
               error={touched.availability ? errors.availability : undefined}
@@ -748,7 +724,7 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
             index={4}
             total={4}
             icon={ImagePlus}
-            title="Photo and fees"
+            title="Photo"
             description="Upload a clear headshot and confirm the fee agreement."
             complete={finalComplete}
             isLast
