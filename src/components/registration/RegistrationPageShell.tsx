@@ -37,6 +37,19 @@ export function RegistrationPageShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         {children}
+
+        {/* Footer credit */}
+        <footer className="mt-8 border-t border-border/70 pt-4 text-center text-sm text-muted-foreground">
+          Design and develop by{" "}
+          <a
+            href="https://www.web-wired.net/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            web-wired.net
+          </a>
+        </footer>
       </div>
     </main>
   );
@@ -98,7 +111,7 @@ function BannerSlideshow() {
             aria-label={`Show banner ${index + 1}`}
             aria-current={index === activeSlide ? "true" : undefined}
             onClick={() => setActiveSlide(index)}
-            className={`h-2.5 w-2.5 border border-[#f4d687] shadow-[0_1px_4px_rgba(0,0,0,0.7)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none sm:h-3 sm:w-3 ${
+            className={`h-2.5 w-2.5 border border-[#f4d687] shadow-[0_1px_4px_rgba(0,0,0,0.7)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white[...]
               index === activeSlide
                 ? "bg-[var(--primary-glow)]"
                 : "bg-[#1b1009]/80 hover:bg-[#f4d687]"
