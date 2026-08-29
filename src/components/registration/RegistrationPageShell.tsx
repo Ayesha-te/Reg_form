@@ -19,7 +19,7 @@ export function RegistrationPageShell({ children }: { children: ReactNode }) {
         <BannerSlideshow />
       </div>
       <div className="relative mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="mb-6 flex min-w-0 items-center justify-between border-b-4 border-[var(--primary-glow)] bg-foreground px-3 py-2 shadow-[var(--shadow-soft)] sm:px-5">
+        <header className="mb-6 flex min-w-0 items-center justify-between border border-border/70 border-b-4 border-b-[var(--primary-glow)] bg-card px-3 py-2 shadow-[var(--shadow-soft)] sm:px-5">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <img
               src={logoUrl}
@@ -27,7 +27,7 @@ export function RegistrationPageShell({ children }: { children: ReactNode }) {
               className="h-14 w-20 shrink-0 object-contain sm:h-16 sm:w-24"
             />
             <div className="min-w-0">
-              <p className="font-display text-base font-black leading-tight tracking-tight text-primary-foreground sm:text-lg">
+              <p className="font-display text-base font-black leading-tight tracking-tight text-foreground sm:text-lg">
                 Avengers Community League 1.0
               </p>
               <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--primary-glow)] sm:mt-0 sm:text-xs sm:tracking-[0.18em]">
