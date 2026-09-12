@@ -9,10 +9,21 @@ import {
   RefreshCcw,
   Search,
   TableProperties,
+  Trash2,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,6 +71,7 @@ const columns = [
   "Franchise Interest",
   "Created At",
   "File",
+  "Actions",
 ];
 
 const excelColumns = [...columns, "Photo Filename Key", "File URL"];
@@ -69,11 +81,13 @@ function SubmissionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [downloadingPhotos, setDownloadingPhotos] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<{
     name: string;
     url: string;
   } | null>(null);
+  const [submissionToDelete, setSubmissionToDelete] = useState<RegistrationSubmission | null>(null);
 
   async function loadSubmissions() {
     setLoading(true);
@@ -122,6 +136,38 @@ function SubmissionsPage() {
       );
     } finally {
       setDownloadingPhotos(false);
+    }
+  }
+
+  async function handleDeleteSubmission() {
+    if (!submissionToDelete) return;
+
+    const id = submissionToDelete.id;
+    setDeletingId(id);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/registrations/${encodeURIComponent(String(id))}`,
+        { method: "DELETE" },
+      );
+      const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.message ?? "Could not delete this submission.");
+      }
+
+      setSubmissions((currentSubmissions) =>
+        currentSubmissions.filter((submission) => submission.id !== id),
+      );
+      setSubmissionToDelete(null);
+    } catch (deleteError) {
+      console.error(deleteError);
+      setError(
+        deleteError instanceof Error ? deleteError.message : "Could not delete this submission.",
+      );
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -268,7 +314,7 @@ function SubmissionsPage() {
           </div>
 
           <div className="overflow-x-auto border-b-4 border-primary/20 [background:linear-gradient(to_right,var(--card)_30%,transparent),linear-gradient(to_left,var(--card)_30%,transparent)] [background-attachment:local,local]">
-            <table className="w-full min-w-[2100px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[2220px] border-collapse text-left text-sm">
               <caption className="sr-only">
                 Avengers Community League player registration submissions
               </caption>
@@ -401,6 +447,22 @@ function SubmissionsPage() {
                             <span className="text-muted-foreground">No file</span>
                           )}
                         </td>
+                        <td className="whitespace-nowrap px-4 py-4 align-middle">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="h-9 rounded-xl px-3 text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => setSubmissionToDelete(submission)}
+                            disabled={deletingId === submission.id}
+                          >
+                            {deletingId === submission.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                            Delete
+                          </Button>
+                        </td>
                       </tr>
                     );
                   })
@@ -432,6 +494,36 @@ function SubmissionsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={Boolean(submissionToDelete)}
+        onOpenChange={(open) => !open && setSubmissionToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete submission?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove{" "}
+              {submissionToDelete ? getSubmissionName(submissionToDelete) : "this submission"} from
+              the submissions list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingId !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletingId !== null}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleDeleteSubmission();
+              }}
+            >
+              {deletingId !== null && <Loader2 className="h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
