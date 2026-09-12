@@ -80,7 +80,10 @@ function SubmissionsPage() {
     setError(null);
 
     try {
-      const params = new URLSearchParams({ eventKey: CURRENT_REGISTRATION_EVENT_KEY });
+      const params = new URLSearchParams({
+        eventKey: CURRENT_REGISTRATION_EVENT_KEY,
+        includeLegacy: "true",
+      });
       const response = await fetch(`${API_BASE_URL}/api/registrations?${params}`);
       const payload = (await response.json()) as RegistrationsListResponse;
 
