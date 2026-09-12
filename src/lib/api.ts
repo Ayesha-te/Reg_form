@@ -1,6 +1,8 @@
 const SUPABASE_STORAGE_BUCKET = "registration-photos";
 const deployedApiBaseUrl = "https://api.stride-events.net";
 
+export const CURRENT_REGISTRATION_EVENT_KEY = "acl-2026-oct";
+
 export const API_BASE_URL = (
   deployedApiBaseUrl || (import.meta.env.DEV ? "http://localhost:4000" : "")
 ).replace(/\/$/, "");
@@ -22,6 +24,7 @@ export type RegistrationResponse = {
   message: string;
   registration: {
     id: number;
+    eventKey?: string;
     fullName?: string;
     firstName?: string;
     lastName?: string;
@@ -32,6 +35,8 @@ export type RegistrationResponse = {
 
 export type RegistrationSubmission = {
   id: string | number;
+  eventKey?: string;
+  event_key?: string;
   firstName?: string;
   first_name?: string;
   lastName?: string;

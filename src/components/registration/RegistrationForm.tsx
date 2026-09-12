@@ -48,7 +48,12 @@ import {
   NOT_AVAILABLE_ON_OPTIONS,
   PREFERRED_SLEEVE_OPTIONS,
 } from "@/lib/registration-data";
-import { API_BASE_URL, type ApiErrorResponse, type RegistrationResponse } from "@/lib/api";
+import {
+  API_BASE_URL,
+  CURRENT_REGISTRATION_EVENT_KEY,
+  type ApiErrorResponse,
+  type RegistrationResponse,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const phoneRegex = /^(\+9715\d{8}|\d{10})$/;
@@ -337,6 +342,7 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
     }
 
     const formData = new FormData();
+    formData.append("eventKey", CURRENT_REGISTRATION_EVENT_KEY);
     formData.append("firstName", parsed.data.firstName);
     formData.append("lastName", parsed.data.lastName);
     formData.append("fullName", `${parsed.data.firstName} ${parsed.data.lastName}`);

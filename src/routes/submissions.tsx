@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   API_BASE_URL,
+  CURRENT_REGISTRATION_EVENT_KEY,
   REGISTRATION_PHOTOS_PUBLIC_BASE_URL,
   type RegistrationsListResponse,
   type RegistrationSubmission,
@@ -79,7 +80,8 @@ function SubmissionsPage() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/registrations`);
+      const params = new URLSearchParams({ eventKey: CURRENT_REGISTRATION_EVENT_KEY });
+      const response = await fetch(`${API_BASE_URL}/api/registrations?${params}`);
       const payload = (await response.json()) as RegistrationsListResponse;
 
       if (!response.ok) {
