@@ -123,11 +123,11 @@ const initial: FormState = {
   preferredSleeves: "",
   availability: "",
   notAvailableOn: [],
-  feeAgreement: false,
-  franchiseInterest: "",
+  feeAgreement: true,
+  franchiseInterest: "No, I am not interested.",
 };
 
-const TOTAL_STEPS = 14;
+const TOTAL_STEPS = 12;
 
 type FieldStatus = "neutral" | "valid" | "error";
 
@@ -176,9 +176,7 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
     return (
       completedFields +
       notAvailableComplete +
-      (file ? 1 : 0) +
-      (values.feeAgreement ? 1 : 0) +
-      (values.franchiseInterest ? 1 : 0)
+      (file ? 1 : 0)
     );
   }, [file, values]);
 
@@ -206,11 +204,7 @@ export function RegistrationForm({ submitPath = "/api/registrations" }: Registra
     (values.availability === "Available all matches" || values.notAvailableOn.length > 0) &&
     !errors.availability &&
     !errors.notAvailableOn;
-  const finalComplete =
-    Boolean(file && values.feeAgreement && values.franchiseInterest) &&
-    !fileError &&
-    !errors.feeAgreement &&
-    !errors.franchiseInterest;
+  const finalComplete = Boolean(file) && !fileError;
 
   useEffect(() => {
     if (!file) {
