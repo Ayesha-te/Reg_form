@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   CalendarDays,
+  CheckCircle2,
   Download,
   Eye,
   FileArchive,
   FileImage,
+  Lock,
   Loader2,
   RefreshCcw,
   Search,
@@ -12,7 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import {
   AlertDialog,
@@ -39,6 +41,7 @@ import {
   API_BASE_URL,
   CURRENT_REGISTRATION_EVENT_KEY,
   REGISTRATION_PHOTOS_PUBLIC_BASE_URL,
+  SUBMISSIONS_PAGE_PASSWORD,
   type RegistrationsListResponse,
   type RegistrationSubmission,
 } from "@/lib/api";
@@ -68,20 +71,28 @@ const columns = [
   "Availability",
   "Not Available On",
   "Fee Agreement",
+  "Payment Status",
   "Franchise Interest",
   "Created At",
   "File",
   "Actions",
 ];
 
-const excelColumns = [...columns, "Photo Filename Key", "File URL"];
+const excelColumns = columns
+  .filter((column) => column !== "Actions")
+  .concat("Photo Filename Key", "File URL");
+const submissionsAuthStorageKey = "acl-submissions-authenticated";
 
 function SubmissionsPage() {
   const [submissions, setSubmissions] = useState<RegistrationSubmission[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [downloadingPhotos, setDownloadingPhotos] = useState(false);
   const [deletingId, setDeletingId] = useState<string | number | null>(null);
+  const [updatingPaymentId, setUpdatingPaymentId] = useState<string | number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<{
     name: string;
@@ -115,8 +126,26 @@ function SubmissionsPage() {
   }
 
   useEffect(() => {
-    void loadSubmissions();
+    setIsUnlocked(sessionStorage.getItem(submissionsAuthStorageKey) === "true");
   }, []);
+
+  useEffect(() => {
+    if (!isUnlocked) return;
+    void loadSubmissions();
+  }, [isUnlocked]);
+
+  function handleUnlock(event: FormEvent) {
+    event.preventDefault();
+
+    if (passwordInput === SUBMISSIONS_PAGE_PASSWORD) {
+      sessionStorage.setItem(submissionsAuthStorageKey, "true");
+      setIsUnlocked(true);
+      setPasswordError(null);
+      return;
+    }
+
+    setPasswordError("Incorrect password.");
+  }
 
   async function handleDownloadPhotos() {
     setDownloadingPhotos(true);
@@ -168,6 +197,45 @@ function SubmissionsPage() {
     }
   }
 
+  async function handleMarkPaid(submission: RegistrationSubmission) {
+    setUpdatingPaymentId(submission.id);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/registrations/${encodeURIComponent(String(submission.id))}/payment`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ manualPaid: true }),
+        },
+      );
+      const payload = (await response.json()) as {
+        message?: string;
+        registration?: RegistrationSubmission;
+      };
+
+      if (!response.ok || !payload.registration) {
+        throw new Error(payload.message ?? "Could not mark this submission as paid.");
+      }
+
+      setSubmissions((currentSubmissions) =>
+        currentSubmissions.map((currentSubmission) =>
+          currentSubmission.id === submission.id ? payload.registration! : currentSubmission,
+        ),
+      );
+    } catch (paymentError) {
+      console.error(paymentError);
+      setError(
+        paymentError instanceof Error
+          ? paymentError.message
+          : "Could not mark this submission as paid.",
+      );
+    } finally {
+      setUpdatingPaymentId(null);
+    }
+  }
+
   const totalFiles = useMemo(
     () => submissions.filter((submission) => getFileUrl(submission)).length,
     [submissions],
@@ -185,6 +253,47 @@ function SubmissionsPage() {
     [filteredSubmissions],
   );
   const hasSearchQuery = searchQuery.trim().length > 0;
+
+  if (!isUnlocked) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <form
+          onSubmit={handleUnlock}
+          className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]"
+        >
+          <div className="mb-5 flex items-center gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-background">
+              <Lock className="h-5 w-5 text-primary" />
+            </span>
+            <div>
+              <h1 className="text-xl font-black tracking-tight text-foreground">Submissions</h1>
+              <p className="text-sm text-muted-foreground">Password required</p>
+            </div>
+          </div>
+
+          <Input
+            type="password"
+            value={passwordInput}
+            onChange={(event) => {
+              setPasswordInput(event.target.value);
+              setPasswordError(null);
+            }}
+            placeholder="Enter password"
+            className="h-11 rounded-xl bg-background"
+            autoFocus
+          />
+
+          {passwordError && (
+            <p className="mt-2 text-sm font-medium text-destructive">{passwordError}</p>
+          )}
+
+          <Button type="submit" className="mt-4 h-11 w-full rounded-xl">
+            Unlock
+          </Button>
+        </form>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -311,7 +420,7 @@ function SubmissionsPage() {
           </div>
 
           <div className="overflow-x-auto border-b-4 border-primary/20 [background:linear-gradient(to_right,var(--card)_30%,transparent),linear-gradient(to_left,var(--card)_30%,transparent)] [background-attachment:local,local]">
-            <table className="w-full min-w-[2220px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[2500px] border-collapse text-left text-sm">
               <caption className="sr-only">
                 Avengers Community League player registration submissions
               </caption>
@@ -364,6 +473,7 @@ function SubmissionsPage() {
                     const displayName =
                       [firstName, lastName].filter(Boolean).join(" ") || fallbackName;
                     const fileUrl = getFileUrl(submission);
+                    const isPaid = isSubmissionManuallyPaid(submission);
 
                     return (
                       <tr key={submission.id} className="border-b border-border last:border-b-0">
@@ -422,6 +532,34 @@ function SubmissionsPage() {
                         </td>
                         <td className="whitespace-nowrap px-4 py-4 align-middle text-muted-foreground">
                           {(submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "-"}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-4 align-middle">
+                          {isPaid ? (
+                            <Badge className="gap-1.5 rounded-full">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              Paid
+                            </Badge>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="rounded-full">
+                                Unpaid — Registration incomplete
+                              </Badge>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="h-8 rounded-xl px-3 text-xs font-semibold"
+                                onClick={() => void handleMarkPaid(submission)}
+                                disabled={updatingPaymentId === submission.id}
+                              >
+                                {updatingPaymentId === submission.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                )}
+                                Mark paid
+                              </Button>
+                            </div>
+                          )}
                         </td>
                         <td className="whitespace-nowrap px-4 py-4 align-middle font-semibold text-primary">
                           {submission.franchiseInterest ?? submission.franchise_interest ?? "-"}
@@ -534,6 +672,10 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function isSubmissionManuallyPaid(submission: RegistrationSubmission) {
+  return Boolean(submission.manualPaid ?? submission.manual_paid);
+}
+
 function getSubmissionSearchText(submission: RegistrationSubmission) {
   const values = [
     submission.firstName,
@@ -559,6 +701,7 @@ function getSubmissionSearchText(submission: RegistrationSubmission) {
     submission.availability,
     ...(submission.notAvailableOn ?? submission.not_available_on ?? []),
     (submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "",
+    isSubmissionManuallyPaid(submission) ? "Paid" : "Unpaid Registration incomplete",
     submission.franchiseInterest,
     submission.franchise_interest,
     formatDateTime(submission.createdAt ?? submission.created_at),
@@ -593,6 +736,7 @@ function exportSubmissionsToExcel(submissions: RegistrationSubmission[]) {
       submission.availability ?? "",
       (submission.notAvailableOn ?? submission.not_available_on ?? []).join(", "),
       (submission.feeAgreement ?? submission.fee_agreement) ? "Accepted" : "",
+      isSubmissionManuallyPaid(submission) ? "Paid" : "Unpaid - Registration incomplete",
       submission.franchiseInterest ?? submission.franchise_interest ?? "",
       formatDateTime(submission.createdAt ?? submission.created_at),
       fileUrl ? "View" : "",
