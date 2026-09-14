@@ -2,7 +2,6 @@ const SUPABASE_STORAGE_BUCKET = "registration-photos";
 const deployedApiBaseUrl = "https://api.stride-events.net";
 
 export const CURRENT_REGISTRATION_EVENT_KEY = "acl-2026-oct";
-export const SUBMISSIONS_PAGE_PASSWORD = import.meta.env.VITE_SUBMISSIONS_PASSWORD ?? "acl2026";
 
 export const API_BASE_URL = (
   deployedApiBaseUrl || (import.meta.env.DEV ? "http://localhost:4000" : "")
@@ -63,10 +62,6 @@ export type RegistrationSubmission = {
   not_available_on?: string[];
   feeAgreement?: boolean;
   fee_agreement?: boolean;
-  manualPaid?: boolean;
-  manual_paid?: boolean;
-  paidAt?: string | null;
-  paid_at?: string | null;
   franchiseInterest?: string;
   franchise_interest?: string;
   dateOfBirth?: string;
