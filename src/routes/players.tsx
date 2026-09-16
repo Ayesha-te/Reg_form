@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Download, FileDown, LoaderCircle, Minus, Settings2, X } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
-import logoUrl from "@/components/logo.png";
+import logoUrl from "@/assets/newlogo.png";
 import { type RegistrationsListResponse, type RegistrationSubmission } from "@/lib/api";
 import {
   findEligiblePlayer,

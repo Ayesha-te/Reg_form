@@ -42,7 +42,7 @@ import {
   type RegistrationsListResponse,
   type RegistrationSubmission,
 } from "@/lib/api";
-import logoUrl from "@/components/logo.png";
+import logoUrl from "@/assets/newlogo.png";
 
 export const Route = createFileRoute("/submissions")({
   head: () => ({
