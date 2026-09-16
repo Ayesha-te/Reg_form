@@ -13,11 +13,13 @@ export function RegistrationPageShell({ children }: { children: ReactNode }) {
       <div className="relative mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="mb-6 flex min-w-0 items-center justify-between border border-border/70 border-b-4 border-b-[var(--primary-glow)] bg-card px-3 py-2 shadow-[var(--shadow-soft)] sm:px-5">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <img
-              src={logoUrl}
-              alt="Avengers Community League logo"
-              className="h-14 w-20 shrink-0 object-contain sm:h-16 sm:w-24"
-            />
+            <span className="flex h-16 w-28 shrink-0 items-center justify-center bg-[#14100c] p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] sm:h-20 sm:w-32">
+              <img
+                src={logoUrl}
+                alt="Avengers Community League logo"
+                className="h-full w-full object-contain"
+              />
+            </span>
             <div className="min-w-0">
               <p className="font-display text-base font-black leading-tight tracking-tight text-foreground sm:text-lg">
                 Avengers Community League 1.0
